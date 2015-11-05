@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snow.Orm
 {
@@ -30,6 +27,10 @@ namespace Snow.Orm
         /// </summary>
         public string Id { set; get; }
         /// <summary>
+        /// 联结
+        /// </summary>
+        public List<string> Join = new List<string>();
+        /// <summary>
         /// 查询条件
         /// </summary>
         public List<string> Where = new List<string>();
@@ -38,10 +39,19 @@ namespace Snow.Orm
         /// </summary>
         public List<string> OrderBy = new List<string>();
         /// <summary>
+        /// 分组
+        /// </summary>
+        public string GroupBy = string.Empty;
+        /// <summary>
+        /// 分组筛选
+        /// </summary>
+        public string Having = string.Empty;
+        /// <summary>
         /// 参数
         /// </summary>
         public List<SqlParameter> Params = new List<SqlParameter>();
     }
+
     /// <summary>
     /// Sql Command
     /// </summary>
@@ -52,26 +62,26 @@ namespace Snow.Orm
         public static string Delete = "delete";
         public static string Select = "select";
     }
-    class Result
+    public class Result
     {
-        bool _ok = true;
+        int _status = 200;
         /// <summary>
         /// 返回成功与否
         /// </summary>
-        public bool Ok
+        public int status
         {
             set
             {
-                _ok = value;
+                _status = value;
             }
             get
             {
-                return _ok;
+                return _status;
             }
         }
         /// <summary>
         /// 返回的消息
         /// </summary>
-        public object Data { set; get; }
+        public object data { set; get; }
     }
 }
