@@ -10,3 +10,10 @@ C:\Snow\Net\Snow.Orm\obj\Debug\Snow.Orm.dll
 C:\Snow\Net\Snow.Orm\obj\Debug\Snow.Orm.pdb
 E:\项目\asp.net\Shebao\Snow.Orm\bin\Debug\Shangshebao.DBUtility.dll
 E:\项目\asp.net\Shebao\Snow.Orm\bin\Debug\Shangshebao.DBUtility.pdb
+F:\shangshebao\Snow.Orm\bin\Debug\Snow.Orm.dll
+F:\shangshebao\Snow.Orm\bin\Debug\Snow.Orm.pdb
+F:\shangshebao\Snow.Orm\bin\Debug\Shangshebao.DBUtility.dll
+F:\shangshebao\Snow.Orm\bin\Debug\Shangshebao.DBUtility.pdb
+F:\shangshebao\Snow.Orm\obj\Debug\Snow.Orm.csprojResolveAssemblyReference.cache
+F:\shangshebao\Snow.Orm\obj\Debug\Snow.Orm.dll
+F:\shangshebao\Snow.Orm\obj\Debug\Snow.Orm.pdb

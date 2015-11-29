@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 namespace Snow.Orm
 {
     class Sql
-    {
+    {     
         /// <summary>
         /// 命令
         /// </summary>
@@ -47,11 +47,58 @@ namespace Snow.Orm
         /// </summary>
         public string Having = string.Empty;
         /// <summary>
-        /// 参数
+        /// 分页
+        /// </summary>
+        public Page Page = new Page();
+        /// <summary>
+        /// 是否主键查询
+        /// </summary>
+        public bool IsKey = false;
+        /// <summary>
+        /// 是否分页查询
+        /// </summary>
+        public bool IsPage = false;
+        /// <summary>
+        /// 是否原生查询
+        /// </summary>
+        public bool IsNative = false;
+        /// <summary>
+        /// 数据库操作命令字符串
+        /// </summary>
+        public List<string> SqlString = new List<string>();
+        /// <summary>
+        /// 查询参数
         /// </summary>
         public List<SqlParameter> Params = new List<SqlParameter>();
     }
 
+    public class Page
+    {
+        /// <summary>
+        /// 总记录数
+        /// </summary>
+        public long rowsCount { set; get; }
+        /// <summary>
+        /// 总页数
+        /// </summary>
+        public int pages { set; get; }
+        /// <summary>
+        /// 页码
+        /// </summary>
+        public int pageIndex { set; get; }
+        /// <summary>
+        /// 每页记录数
+        /// </summary>
+        public int pageSize { set; get; }
+        /// <summary>
+        /// 起始序号
+        /// </summary>
+        public int startIndex { set; get; }
+        /// <summary>
+        /// 终止序号
+        /// </summary>
+        public int endIndex { set; get; }
+    }
     /// <summary>
     /// Sql Command
     /// </summary>

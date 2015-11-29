@@ -9,25 +9,30 @@ namespace Snow.Orm
         /// <summary>
         /// 返回的结果
         /// </summary>
-        Result result = new Result();
+        Result result;
 
 
         /// <summary>
         /// 以id为条件，忽略其他条件和排序
         /// </summary>
-        bool _idCondition = false;
+        //bool IsKey = false;
         /// <summary>
         /// 是否原生命令
         /// </summary>
-        bool _nativeSql = false;
+        //bool IsNative = false;
+        /// <summary>
+        /// 是否分页查询
+        /// </summary>
+        //bool _isPage = false;
+
         /// <summary>
         ///  sql命令
         /// </summary>
-        string _sqlStr = string.Empty;
+        //string _sqlStr = string.Empty;
         /// <summary>
         /// 命令参数集合
         /// </summary>
-        SqlParameter[] _parameters;
+        //SqlParameter[] _parameters;
 
         #endregion
 
@@ -45,7 +50,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db Id(string key, object arg)
         {
-            this._idCondition = true;
+            this.cmd.IsKey = true;
 
             cmd.Id = string.Format("{0} = @{0}", key);
             // 
@@ -142,6 +147,12 @@ namespace Snow.Orm
             cmd.Where.Add(string.Format(" {0} like '{1}'", field, arg));
             return this;
         }
+        /// <summary>
+        /// in 查询
+        /// </summary>
+        /// <param name="field">字段名</param>
+        /// <param name="args">参数值</param>
+        /// <returns></returns>
         public Db In(string field, params object[] args)
         {
             if (args.Length > 0)
@@ -156,6 +167,12 @@ namespace Snow.Orm
             }
             return this;
         }
+        /// <summary>
+        /// not in 查询
+        /// </summary>
+        /// <param name="field">字段名</param>
+        /// <param name="args">参数值</param>
+        /// <returns></returns>
         public Db NotIn(string field, params object[] args)
         {
             if (args.Length > 0)
@@ -170,17 +187,31 @@ namespace Snow.Orm
             }
             return this;
         }
-
+        /// <summary>
+        /// 排序
+        /// </summary>
+        /// <param name="asc"></param>
+        /// <returns></returns>
         public Db OrderBy(string asc)
         {
             cmd.OrderBy.Add(asc);
             return this;
         }
+        /// <summary>
+        /// 倒序排序
+        /// </summary>
+        /// <param name="desc"></param>
+        /// <returns></returns>
         public Db Desc(string desc)
         {
             cmd.OrderBy.Add(desc + " desc");
             return this;
         }
+        /// <summary>
+        /// 正向排序
+        /// </summary>
+        /// <param name="asc"></param>
+        /// <returns></returns>
         public Db Asc(string asc)
         {
             cmd.OrderBy.Add(asc + " asc");
@@ -195,6 +226,11 @@ namespace Snow.Orm
         {
             cmd.Fields.Clear();
             cmd.Fields.AddRange(cols);
+            // 全部元素转为小写
+            for (int i = 0; i < cmd.Fields.Count; i++)
+            {
+                cmd.Fields[i] = cmd.Fields[i].ToLower();
+            }
             return this;
         }
         /// <summary>
@@ -217,11 +253,51 @@ namespace Snow.Orm
             cmd.Having = having;
             return this;
         }
+        /// <summary>
+        /// 强调要查询的表名
+        /// </summary>
+        /// <param name="table">表名</param>
+        /// <returns></returns>
         public Db Table(string table)
         {
             cmd.Table = table;
             return this;
         }
+
+        ///// <summary>
+        ///// 分页
+        ///// </summary>
+        ///// <param name="startIndex">起始行号</param>
+        ///// <param name="endIndex">终止行号</param>
+        ///// <returns></returns>
+        //public Db Page(int startIndex = 1, int endIndex = 10)
+        //{
+        //    // 终止行号 必须大于 起始行号
+        //    if (endIndex >= startIndex)
+        //    {
+        //        cmd.Page.startIndex = startIndex;
+        //        cmd.Page.endIndex = endIndex;
+        //        //
+        //        cmd.IsPage = true;
+        //    }
+        //    return this;
+        //}
+
+        /// <summary>
+        /// 分页
+        /// </summary>
+        /// <param name="pageIndex">当前页码</param>
+        /// <param name="pageSize">每页的记录数</param>
+        /// <returns></returns>
+        public Db Page(int pageIndex,int pageSize)
+        {
+            cmd.Page.pageIndex = pageIndex;
+            cmd.Page.pageSize = pageSize;
+
+            cmd.IsPage = true;
+            return this;
+        }
+
         /// <summary>
         /// 获取最终sql命令
         /// </summary>
@@ -233,26 +309,26 @@ namespace Snow.Orm
             {
                 _param[i] = cmd.Params[i].ParameterName + "=" + cmd.Params[i].Value;
             }
-            return this._sqlStr + ";" + string.Join(",", _param);
+            return string.Join(" ",cmd.SqlString) + ";" + string.Join(",", _param);
         }
         /// <summary>
         /// 原生数据库操作命令
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="sql"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public Db Sql(string command, params object[] args)
+        public Db Sql(string sql, params object[] args)
         {
             cmd.Where.Clear();
             cmd.Params.Clear();
 
             // 构造查询命令
-            this.parameter(command, args);
+            this.parameter(sql, args);
 
-            this._sqlStr = cmd.Where.ToString();
-            this._parameters = cmd.Params.ToArray();
+            cmd.SqlString.Clear();
+            this.cmd.SqlString.AddRange(cmd.Where);
 
-            this._nativeSql = true;
+            this.cmd.IsNative = true;
 
             return this;
         }
@@ -264,7 +340,7 @@ namespace Snow.Orm
         /// <returns></returns>
         private void createSql()
         {
-            if (string.IsNullOrWhiteSpace(this._sqlStr))
+            if (this.cmd.SqlString.Count == 0)
             {
                 switch (cmd.Command.ToLower())
                 {
@@ -283,7 +359,7 @@ namespace Snow.Orm
                     default:
                         break;
                 }
-                this._parameters = this.cmd.Params.ToArray();
+                //this._parameters = this.cmd.Params.ToArray();
             }
         }
 
@@ -317,6 +393,8 @@ namespace Snow.Orm
                     _start = _next + 1;
                     _count++;
                 }
+                // 之后的其他字符
+                cmd.Where.Add(condition.Substring(_start));
             }
             else
             {
