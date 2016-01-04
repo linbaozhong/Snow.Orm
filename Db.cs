@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System.Collections.Generic;
+using System.Data.SqlClient;
 
 namespace Snow.Orm
 {
@@ -10,7 +11,10 @@ namespace Snow.Orm
         /// 返回的结果
         /// </summary>
         Result result;
-
+        /// <summary>
+        /// 查询参数
+        /// </summary>
+        SqlParameter[] parameters;
 
         /// <summary>
         /// 以id为条件，忽略其他条件和排序
@@ -56,6 +60,20 @@ namespace Snow.Orm
             // 
             cmd.Params.Add(new SqlParameter("@" + key, arg));
 
+            return this;
+        }
+        /// <summary>
+        /// 返回前n个记录
+        /// </summary>
+        /// <param name="n">前n个记录</param>
+        /// <returns></returns>
+        public Db Top(int n)
+        {
+            if (n <= 1)
+            {
+                n = 1;
+            }
+            cmd.Top = n;
             return this;
         }
         /// <summary>
@@ -110,10 +128,10 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db And(string condition, params object[] args)
         {
-            if (cmd.Where.Count > 0)
-            {
-                cmd.Where.Add(" and ");
-            }
+            //if (cmd.Where.Count > 0)
+            //{
+            //    cmd.Where.Add(" and ");
+            //}
             parameter(condition, args);
             return this;
         }
@@ -144,7 +162,22 @@ namespace Snow.Orm
             {
                 cmd.Where.Add(" and ");
             }
-            cmd.Where.Add(string.Format(" {0} like '{1}'", field, arg));
+            cmd.Where.Add(string.Format(" {0} like '%{1}%'", field, arg));
+            return this;
+        }
+        /// <summary>
+        /// 前缀查询(索引优化)
+        /// </summary>
+        /// <param name="field">字段名</param>
+        /// <param name="arg">参数</param>
+        /// <returns></returns>
+        public Db StartsWith(string field, string arg)
+        {
+            if (cmd.Where.Count > 0)
+            {
+                cmd.Where.Add(" and ");
+            }
+            cmd.Where.Add(string.Format(" {0} like '{1}%'", field, arg));
             return this;
         }
         /// <summary>
@@ -234,6 +267,22 @@ namespace Snow.Orm
             return this;
         }
         /// <summary>
+        /// 排除的字段
+        /// </summary>
+        /// <param name="cols">字段名参数</param>
+        /// <returns></returns>
+        public Db Exclude(params string[] cols)
+        {
+            cmd.ExcludeFields.Clear();
+            cmd.ExcludeFields.AddRange(cols);
+
+            for (int i = 0; i < cmd.ExcludeFields.Count; i++)
+            {
+                cmd.ExcludeFields[i] = cmd.ExcludeFields[i].ToLower();
+            }
+            return this;
+        }
+        /// <summary>
         /// 分组
         /// </summary>
         /// <param name="groupby"></param>
@@ -289,7 +338,7 @@ namespace Snow.Orm
         /// <param name="pageIndex">当前页码</param>
         /// <param name="pageSize">每页的记录数</param>
         /// <returns></returns>
-        public Db Page(int pageIndex,int pageSize)
+        public Db Page(int pageIndex, int pageSize)
         {
             cmd.Page.pageIndex = pageIndex;
             cmd.Page.pageSize = pageSize;
@@ -304,12 +353,12 @@ namespace Snow.Orm
         /// <returns></returns>
         public string GetSql()
         {
-            string[] _param = new string[cmd.Params.Count];
-            for (int i = 0; i < cmd.Params.Count; i++)
+            string[] _param = new string[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
             {
-                _param[i] = cmd.Params[i].ParameterName + "=" + cmd.Params[i].Value;
+                _param[i] = parameters[i].ParameterName + "=" + parameters[i].Value;
             }
-            return string.Join(" ",cmd.SqlString) + ";" + string.Join(",", _param);
+            return string.Join(" ", cmd.SqlString) + ";" + string.Join(",", _param);
         }
         /// <summary>
         /// 原生数据库操作命令
@@ -332,7 +381,19 @@ namespace Snow.Orm
 
             return this;
         }
-
+        /// <summary>
+        /// 获取查询参数集
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> Output()
+        {
+            Dictionary<string, object> _param = new Dictionary<string, object>();
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                _param.Add(parameters[i].ParameterName, parameters[i].Value);
+            }
+            return _param;
+        }
         /// <summary>
         /// 构造sql命令
         /// </summary>
@@ -359,7 +420,6 @@ namespace Snow.Orm
                     default:
                         break;
                 }
-                //this._parameters = this.cmd.Params.ToArray();
             }
         }
 
@@ -374,6 +434,10 @@ namespace Snow.Orm
         /// <param name="args"></param>
         private void parameter(string condition, params object[] args)
         {
+            if (cmd.Where.Count > 0)
+            {
+                cmd.Where.Add(" and ");
+            }
             if (args.Length > 0)
             {
                 int _start = 0, _next = 0;

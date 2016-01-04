@@ -5,7 +5,7 @@ using System.Data.SqlClient;
 namespace Snow.Orm
 {
     class Sql
-    {     
+    {
         /// <summary>
         /// 命令
         /// </summary>
@@ -19,9 +19,13 @@ namespace Snow.Orm
         /// </summary>
         public Int64 Top { set; get; }
         /// <summary>
-        /// 字段
+        /// 包含的字段
         /// </summary>
         public List<string> Fields = new List<string>();
+        /// <summary>
+        /// 排除的字段
+        /// </summary>
+        public List<string> ExcludeFields = new List<string>();
         /// <summary>
         /// 查询主键
         /// </summary>
@@ -71,7 +75,29 @@ namespace Snow.Orm
         /// </summary>
         public List<SqlParameter> Params = new List<SqlParameter>();
     }
-
+    public class Direction
+    {
+        string _field;
+        System.Data.ParameterDirection _direction;
+        /// <summary>
+        /// 存储过程的参数
+        /// </summary>
+        /// <param name="field">字段名</param>
+        /// <param name="direction">参数方向</param>
+        public Direction(string field, System.Data.ParameterDirection direction)
+        {
+            this._field = field;
+            this._direction = direction;
+        }
+        /// <summary>
+        /// 字段名
+        /// </summary>
+        public string field { set { _field = value; } get { return _field; } }
+        /// <summary>
+        /// 参数方向
+        /// </summary>
+        public System.Data.ParameterDirection direction { set { _direction = value; } get { return _direction; } }
+    }
     public class Page
     {
         /// <summary>

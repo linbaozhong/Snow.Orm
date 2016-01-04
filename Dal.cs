@@ -27,7 +27,7 @@ namespace Snow.Orm
                     // 读取一条记录
                     cmd.Top = 1;
                     // 查询准备
-                    this._query<T>();
+                    this._query<T>(model);
                     // 构造命令
                     this.createSql();
                 }
@@ -134,28 +134,36 @@ namespace Snow.Orm
             result = new Result();
             try
             {
+                // 获取对象的类型
+                Type m_type = typeof(T);
+                // 获取该对象的全部属性
+                PropertyInfo[] properties = m_type.GetProperties();
+
                 if (!this.cmd.IsNative)
                 {
                     // 插入
                     cmd.Command = Command.Insert;
-                    // 获取对象的类型
-                    Type m_type = typeof(T);
-                    //Type m_type = model.GetType();
                     // 表名
                     this._getTableName(m_type);
 
                     // 如果没有指定返回列，则返回传入参数对象的全部列
                     if (cmd.Fields.Count == 0)
                     {
-                        // 获取该对象的全部属性
-                        PropertyInfo[] properties = m_type.GetProperties();
 
                         for (int i = 0; i < properties.Length; i++)
                         {
-                            // 忽略数据库自增字段
-                            if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                            // 忽略排除字段
+                            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
                             {
                                 continue;
+                            }
+                            // 数据库自增字段
+                            if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                            {
+                                SqlParameter idParameter = new SqlParameter("@id", 0);
+                                idParameter.Direction = ParameterDirection.Output;
+
+                                cmd.Params.Add(idParameter);
                             }
                             else
                             {
@@ -168,7 +176,24 @@ namespace Snow.Orm
                     this.createSql();
                 }
 
-                DbHelperSQL.ExecuteSql(string.Join(" ",this.cmd.SqlString), this.cmd.Params.ToArray());
+                parameters = this.cmd.Params.ToArray();
+
+                // 返回数据库自增关键字段值
+                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+                // 将自增字段值写入model
+                for (int i = 0; i < properties.Length; i++)
+                {
+                    // 数据库自增字段
+                    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                    {
+                        switch (properties[i].PropertyType.Name)
+                        {
+                            case "Int64":
+                                properties[i].SetValue(model, Convert.ToInt64(cmd.Params[i].Value));
+                                break;
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -179,6 +204,109 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
+                this._finish();
+            }
+
+            return result;
+        }
+
+        public Result Insert<T>(List<T> model)
+        {
+            result = new Result();
+
+            try
+            {
+                if (this.cmd.IsNative)
+                {
+                    this.createSql();
+
+                    parameters = this.cmd.Params.ToArray();
+
+                    DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+                }
+                else
+                {
+                    // 命令列表
+                    List<CommandInfo> l_command = new List<CommandInfo>();
+                    // 插入
+                    cmd.Command = Command.Insert;
+                    // 获取对象的类型
+                    Type m_type = typeof(T);
+                    // 表名
+                    this._getTableName(m_type);
+
+                    // 获取该对象的全部属性
+                    PropertyInfo[] properties = m_type.GetProperties();
+
+                    // 如果没有指定返回列，则返回传入参数对象的全部列
+                    if (cmd.Fields.Count == 0)
+                    {
+                        foreach (T item in model)
+                        {
+                            for (int i = 0; i < properties.Length; i++)
+                            {
+                                // 忽略排除字段
+                                if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                                {
+                                    continue;
+                                }
+
+                                // 忽略数据库自增字段
+                                if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                                {
+                                    SqlParameter idParameter = new SqlParameter("@id", 0);
+                                    idParameter.Direction = ParameterDirection.Output;
+
+                                    cmd.Params.Add(idParameter);
+                                }
+                                else
+                                {
+                                    cmd.Fields.Add(properties[i].Name.ToLower());
+
+                                    cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(item)));
+                                }
+                            }
+
+                            this.createSql();
+
+                            parameters = this.cmd.Params.ToArray();
+
+                            l_command.Add(new CommandInfo(string.Join(" ", this.cmd.SqlString), this.parameters));
+
+                            // 调试
+                            this.trace(this.GetSql());
+
+                            cmd.Fields.Clear();
+                            cmd.Params.Clear();
+                        }
+                    }
+                    DbHelperSQL.ExecuteSqlTran(l_command);
+                    // 将自增字段值写入model
+                    for (int t = 0; t < model.Count; t++)
+                    {
+                        for (int i = 0; i < properties.Length; i++)
+                        {
+                            // 数据库自增字段
+                            if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                            {
+                                switch (properties[i].PropertyType.Name)
+                                {
+                                    case "Int64":
+                                        properties[i].SetValue(model[t], Convert.ToInt64(l_command[t].Parameters[i].Value));
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                result.status = -1;
+                result.data = e;
+            }
+            finally
+            {
                 this._finish();
             }
 
@@ -202,10 +330,9 @@ namespace Snow.Orm
                     cmd.Command = Command.Update;
                     // 获取对象的类型
                     Type m_type = typeof(T);
-                    //Type m_type = model.GetType();
                     // 表名
                     this._getTableName(m_type);
-                    
+
                     // 获取该对象的全部属性
                     PropertyInfo[] properties = m_type.GetProperties();
 
@@ -214,6 +341,12 @@ namespace Snow.Orm
                     {
                         for (int i = 0; i < properties.Length; i++)
                         {
+                            // 忽略排除字段
+                            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                            {
+                                continue;
+                            }
+
                             cmd.Fields.Add(properties[i].Name.ToLower());
 
                             cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
@@ -232,7 +365,9 @@ namespace Snow.Orm
                     this.createSql();
                 }
 
-                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+                parameters = this.cmd.Params.ToArray();
+
+                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
             }
             catch (Exception e)
             {
@@ -274,7 +409,9 @@ namespace Snow.Orm
                     this.createSql();
                 }
 
-                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+                parameters = this.cmd.Params.ToArray();
+
+                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
             }
             catch (Exception e)
             {
@@ -308,7 +445,10 @@ namespace Snow.Orm
                     // 构造命令
                     this.createSql();
                 }
-                return DbHelperSQL.Exists(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+
+                parameters = this.cmd.Params.ToArray();
+
+                return DbHelperSQL.Exists(string.Join(" ", this.cmd.SqlString), this.parameters);
             }
             catch (Exception e)
             {
@@ -344,7 +484,9 @@ namespace Snow.Orm
                     this.createSql();
                 }
 
-                object n = DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+                parameters = this.cmd.Params.ToArray();
+
+                object n = DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
 
                 return Convert.ToInt64(n);
             }
@@ -374,14 +516,15 @@ namespace Snow.Orm
             {
                 if (!this.cmd.IsNative)
                 {
-
                     // 查询准备
                     this._query<T>();
                     // 构造命令
                     this.createSql();
                 }
 
-                return DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+                parameters = this.cmd.Params.ToArray();
+
+                return DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
             }
             catch (Exception e)
             {
@@ -407,7 +550,9 @@ namespace Snow.Orm
             {
                 if (this.cmd.IsNative)
                 {
-                    return DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+                    parameters = this.cmd.Params.ToArray();
+
+                    return DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
                 }
                 else
                 {
@@ -428,6 +573,108 @@ namespace Snow.Orm
             }
         }
 
+        /// <summary>
+        /// 执行指定的存储过程
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="procedureName">存储过程名</param>
+        /// <param name="model"></param>
+        /// <param name="outputs">参数</param>
+        /// <returns></returns>
+        public Result Procedure<T>(string procedureName, T model, params Direction[] direction)
+        {
+            result = new Result();
+            // 
+            if (string.IsNullOrWhiteSpace(procedureName))
+            {
+                result.status = -1;
+                result.data = new Exception("存储过程名缺失");
+            }
+            else
+            {
+                try
+                {
+                    if (!this.cmd.IsNative)
+                    {
+                        // 将输入输出参数数组转为字典
+                        Dictionary<string, ParameterDirection> d_param = new Dictionary<string, ParameterDirection>();
+
+                        Array.ForEach(direction, d => d_param.Add(d.field.ToLower(), d.direction));
+
+                        // 获取对象的类型
+                        Type m_type = typeof(T);
+
+                        // 获取该对象的全部属性
+                        PropertyInfo[] properties = m_type.GetProperties();
+
+                        // 如果没有指定更新列，则更新传入参数对象的全部列
+                        if (cmd.Fields.Count == 0)
+                        {
+                            for (int i = 0; i < properties.Length; i++)
+                            {
+                                // 忽略排除字段
+                                if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                                {
+                                    continue;
+                                }
+
+                                cmd.Fields.Add(properties[i].Name.ToLower());
+
+                                SqlParameter param = new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model));
+
+                                // 参数方向
+                                ParameterDirection dir;
+                                if (d_param.TryGetValue(properties[i].Name.ToLower(), out dir))
+                                {
+                                    param.Direction = dir;
+                                }
+
+                                cmd.Params.Add(param);
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < properties.Length; i++)
+                            {
+                                if (cmd.Fields.Contains(properties[i].Name.ToLower()))
+                                {
+                                    SqlParameter param = new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model));
+
+                                    // 参数方向
+                                    ParameterDirection dir;
+                                    if (d_param.TryGetValue(properties[i].Name.ToLower(), out dir))
+                                    {
+                                        param.Direction = dir;
+                                    }
+
+                                    cmd.Params.Add(param);
+                                }
+                            }
+                        }
+                    }
+                    int rowsAffected = 0;
+
+                    parameters = this.cmd.Params.ToArray();
+
+                    int n = DbHelperSQL.RunProcedure(procedureName, parameters, out rowsAffected);
+                    if (n != 0)
+                    {
+                        result.status = -1;
+                        result.data = n;
+                    }
+                }
+                catch (Exception e)
+                {
+                    result.status = -1;
+                    result.data = e;
+                }
+                finally
+                {
+                    this._finish();
+                }
+            }
+            return result;
+        }
 
         #endregion
 
@@ -439,7 +686,8 @@ namespace Snow.Orm
             this.cmd = new Sql();
         }
 
-        private void _getTableName(Type type) {
+        private void _getTableName(Type type)
+        {
 
             if (string.IsNullOrWhiteSpace(cmd.Table))
             {
@@ -454,7 +702,7 @@ namespace Snow.Orm
                 }
             }
         }
-        private void _query<T>()
+        private void _query<T>(T model = default(T))
         {
             cmd.Command = Command.Select;
 
@@ -462,7 +710,7 @@ namespace Snow.Orm
             Type m_type = typeof(T);
             // 表名
             this._getTableName(m_type);
-            
+
             // 如果没有指定返回列，则返回传入参数对象的全部列
             if (cmd.Fields.Count == 0)
             {
@@ -471,7 +719,14 @@ namespace Snow.Orm
 
                 for (int i = 0; i < properties.Length; i++)
                 {
+                    // 忽略排除字段
+                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                    {
+                        continue;
+                    }
                     cmd.Fields.Add(properties[i].Name.ToLower());
+                    //
+                    //properties[i].GetValue(model);
                 }
             }
         }
@@ -482,7 +737,9 @@ namespace Snow.Orm
         /// <returns></returns>
         private DataSet _dataSet()
         {
-            return DbHelperSQL.Query(string.Join(" ", this.cmd.SqlString), this.cmd.Params.ToArray());
+            parameters = this.cmd.Params.ToArray();
+
+            return DbHelperSQL.Query(string.Join(" ", this.cmd.SqlString), parameters);
         }
 
         /// <summary>
@@ -497,6 +754,10 @@ namespace Snow.Orm
             if (ds.Tables[0].Rows.Count > 0)
             {
                 DataRow2Model(model, ds.Tables[0].Rows[0]);
+            }
+            else
+            {
+                model = default(T);
             }
         }
         /// <summary>
@@ -518,7 +779,9 @@ namespace Snow.Orm
                     // 调试
                     this.trace(_countSql);
 
-                    object n = DbHelperSQL.GetSingle(_countSql, this.cmd.Params.ToArray());
+                    parameters = this.cmd.Params.ToArray();
+
+                    object n = DbHelperSQL.GetSingle(_countSql, this.parameters);
 
                     cmd.Page.rowsCount = Convert.ToInt64(n);
 
@@ -542,25 +805,25 @@ namespace Snow.Orm
                 }
 
                 // Fields
-                if (cmd.Fields.Count > 0)
+                if (cmd.Fields.Count == 0)
                 {
-                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
+                    cmd.SqlString.Add(" *");
                 }
                 else
                 {
-                    cmd.SqlString.Add(" *");
+                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
                 }
 
                 //
                 cmd.SqlString.Add(" from ( select row_number() over (");
                 // Order
-                if (cmd.OrderBy.Count > 0)
+                if (cmd.OrderBy.Count == 0)
                 {
-                    cmd.SqlString.Add(string.Format(" order by T.{0}", string.Join(",T.", cmd.OrderBy.ToArray())));
+                    cmd.SqlString.Add(" order by T.id desc");
                 }
                 else
                 {
-                    cmd.SqlString.Add(" order by T.id desc");
+                    cmd.SqlString.Add(string.Format(" order by T.{0}", string.Join(",T.", cmd.OrderBy.ToArray())));
                 }
                 cmd.SqlString.Add(string.Format(")as Row,T.* from {0} T", cmd.Table));
 
@@ -581,13 +844,13 @@ namespace Snow.Orm
                 }
 
                 // Fields
-                if (cmd.Fields.Count > 0)
+                if (cmd.Fields.Count == 0)
                 {
-                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
+                    cmd.SqlString.Add(" *");
                 }
                 else
                 {
-                    cmd.SqlString.Add(" *");
+                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
                 }
                 // From
                 cmd.SqlString.Add(string.Format(" from {0}", cmd.Table));
@@ -605,8 +868,12 @@ namespace Snow.Orm
                 }
                 else
                 {
-                    // Where
-                    if (cmd.Where.Count > 0)
+                    // 构造查询条件 Where子句
+                    if (cmd.Where.Count == 0)
+                    {
+                        // 如果不存在where条件,已当前model的非初始字段为条件
+                    }
+                    else
                     {
                         cmd.SqlString.Add(string.Format(" where {0}", string.Join(" ", cmd.Where.ToArray())));
                     }
@@ -636,7 +903,7 @@ namespace Snow.Orm
         private void _insert()
         {
             // 命令
-            cmd.SqlString.Clear(); 
+            cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
             cmd.SqlString.Add(cmd.Table);
             // Fields
@@ -650,15 +917,22 @@ namespace Snow.Orm
             cmd.SqlString.Add("values (");
 
             //参数
-            string[] _param = new string[cmd.Params.Count];
+            List<string> _param = new List<string>();
             for (int i = 0; i < cmd.Params.Count; i++)
             {
-                _param[i] = cmd.Params[i].ParameterName;
+                // 忽略output参数
+                if (cmd.Params[i].Direction == ParameterDirection.Output)
+                {
+                    continue;
+                }
+                _param.Add(cmd.Params[i].ParameterName);
             }
 
             cmd.SqlString.Add(string.Join(",", _param));
 
             cmd.SqlString.Add(")");
+            // 返回自增id
+            cmd.SqlString.Add(";select @id = SCOPE_IDENTITY()");
         }
         /// <summary>
         /// 构造update命令
@@ -666,7 +940,7 @@ namespace Snow.Orm
         private void _update()
         {
             // 命令
-            cmd.SqlString.Clear(); 
+            cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
             cmd.SqlString.Add(cmd.Table);
             cmd.SqlString.Add("set");
@@ -705,7 +979,7 @@ namespace Snow.Orm
         private void _delete()
         {
             // 命令
-            cmd.SqlString.Clear(); 
+            cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
             // From
             cmd.SqlString.Add(cmd.Table);
