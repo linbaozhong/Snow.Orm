@@ -4,3 +4,9 @@ E:\项目\asp.net\Shebao\Snow.Orm\bin\Release\Shangshebao.DBUtility.dll
 E:\项目\asp.net\Shebao\Snow.Orm\obj\Release\Snow.Orm.csprojResolveAssemblyReference.cache
 E:\项目\asp.net\Shebao\Snow.Orm\obj\Release\Snow.Orm.dll
 E:\项目\asp.net\Shebao\Snow.Orm\obj\Release\Snow.Orm.pdb
+F:\shangshebao\Snow.Orm\bin\Release\Snow.Orm.dll
+F:\shangshebao\Snow.Orm\bin\Release\Snow.Orm.pdb
+F:\shangshebao\Snow.Orm\bin\Release\Shangshebao.DBUtility.dll
+F:\shangshebao\Snow.Orm\obj\Release\Snow.Orm.csprojResolveAssemblyReference.cache
+F:\shangshebao\Snow.Orm\obj\Release\Snow.Orm.dll
+F:\shangshebao\Snow.Orm\obj\Release\Snow.Orm.pdb
