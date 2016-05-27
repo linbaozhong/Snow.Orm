@@ -117,6 +117,10 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db Where(string condition, params object[] args)
         {
+            if (cmd.Where.Count > 0)
+            {
+                cmd.Where.Add(" and ");
+            } 
             parameter(condition, args);
             return this;
         }
@@ -128,10 +132,10 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db And(string condition, params object[] args)
         {
-            //if (cmd.Where.Count > 0)
-            //{
-            //    cmd.Where.Add(" and ");
-            //}
+            if (cmd.Where.Count > 0)
+            {
+                cmd.Where.Add(" and ");
+            }
             parameter(condition, args);
             return this;
         }
@@ -434,10 +438,10 @@ namespace Snow.Orm
         /// <param name="args"></param>
         private void parameter(string condition, params object[] args)
         {
-            if (cmd.Where.Count > 0)
-            {
-                cmd.Where.Add(" and ");
-            }
+            //if (cmd.Where.Count > 0)
+            //{
+            //    cmd.Where.Add(" and ");
+            //}
             if (args.Length > 0)
             {
                 int _start = 0, _next = 0;
