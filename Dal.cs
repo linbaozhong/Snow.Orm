@@ -1,10 +1,11 @@
-﻿using Shangshebao.DBUtility;
+﻿using Snow.DBUtility;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Snow.Orm
 {
@@ -17,9 +18,11 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Get<T>(T model)
+        public Result Get<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+
+            this._prepare(filePath, methodName, lineNumber);
+            
             try
             {
                 if (!this.cmd.IsNative)
@@ -45,18 +48,18 @@ namespace Snow.Orm
                 this.trace(this.GetSql());
                 this._finish();
             }
-
             return result;
         }
+
         /// <summary>
         /// 获取数据对象列表
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Find<T>(List<T> model) where T : class,new()
+        public Result Find<T>(List<T> model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0) where T : class,new()
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -129,9 +132,9 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Insert<T>(T model)
+        public Result Insert<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 // 获取对象的类型
@@ -210,9 +213,9 @@ namespace Snow.Orm
             return result;
         }
 
-        public Result Insert<T>(List<T> model)
+        public Result Insert<T>(List<T> model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
 
             try
             {
@@ -318,9 +321,9 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Update<T>(T model)
+        public Result Update<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -390,9 +393,9 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Delete<T>()
+        public Result Delete<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -433,9 +436,9 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Exists<T>()
+        public bool Exists<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -470,9 +473,9 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Int64 Count<T>()
+        public Int64 Count<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -509,9 +512,9 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public object Single<T>()
+        public object Single<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -543,9 +546,9 @@ namespace Snow.Orm
         /// 执行原生查询，返回受影响的行数
         /// </summary>
         /// <returns></returns>
-        public int Exec()
+        public int Exec([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             try
             {
                 if (this.cmd.IsNative)
@@ -581,9 +584,9 @@ namespace Snow.Orm
         /// <param name="model"></param>
         /// <param name="outputs">参数</param>
         /// <returns></returns>
-        public Result Procedure<T>(string procedureName, T model, params Direction[] direction)
+        public Result Procedure<T>(string procedureName, T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0, params Direction[] direction)
         {
-            result = new Result();
+            this._prepare(filePath, methodName, lineNumber);
             // 
             if (string.IsNullOrWhiteSpace(procedureName))
             {
@@ -680,7 +683,20 @@ namespace Snow.Orm
 
 
         #region 私有方法
+        /// <summary>
+        /// 预处理
+        /// </summary>
+        private void _prepare(string filePath, string methodName, int lineNumber)
+        {
+            result = new Result();
 
+            cacheKay = MD5Encrypt.Get32(filePath + "-" + methodName + "-" + lineNumber);
+
+            result.data = filePath + "-" + methodName + "-" + lineNumber;
+        }
+        /// <summary>
+        /// 结束处理
+        /// </summary>
         private void _finish()
         {
             this.cmd = new Sql();
@@ -694,13 +710,16 @@ namespace Snow.Orm
                 TableAttribute t_attr = type.GetCustomAttribute(typeof(TableAttribute), false) as TableAttribute;
                 if (t_attr == null)
                 {
-                    cmd.Table = type.Name;
+                    cmd.Table = _getName(type.Name);
                 }
                 else
                 {
-                    cmd.Table = t_attr.Name;
+                    cmd.Table = _getName(t_attr.Name);
                 }
             }
+        }
+        private string _getName(string str) {
+            return "[" + str + "]";
         }
         private void _query<T>(T model = default(T))
         {
@@ -724,7 +743,7 @@ namespace Snow.Orm
                     {
                         continue;
                     }
-                    cmd.Fields.Add(properties[i].Name.ToLower());
+                    cmd.Fields.Add(_getName(properties[i].Name.ToLower()));
                     //
                     //properties[i].GetValue(model);
                 }

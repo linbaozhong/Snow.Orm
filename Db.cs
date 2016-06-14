@@ -15,6 +15,10 @@ namespace Snow.Orm
         /// 查询参数
         /// </summary>
         SqlParameter[] parameters;
+        /// <summary>
+        /// Cache键
+        /// </summary>
+        string cacheKay;
 
         /// <summary>
         /// 以id为条件，忽略其他条件和排序
@@ -56,7 +60,7 @@ namespace Snow.Orm
         {
             this.cmd.IsKey = true;
 
-            cmd.Id = string.Format("{0} = @{0}", key);
+            cmd.Id = string.Format("[{0}] = @{0}", key);
             // 
             cmd.Params.Add(new SqlParameter("@" + key, arg));
 
@@ -84,7 +88,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db Inner(string table, string on)
         {
-            cmd.Join.Add(string.Format(" inner join {0} on {1}", table, on));
+            cmd.Join.Add(string.Format(" inner join [{0}] on {1}", table, on));
             return this;
         }
         /// <summary>
@@ -95,7 +99,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db Left(string table, string on)
         {
-            cmd.Join.Add(string.Format(" left outer join {0} on {1}", table, on));
+            cmd.Join.Add(string.Format(" left outer join [{0}] on {1}", table, on));
             return this;
         }
         /// <summary>
@@ -106,7 +110,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db Right(string table, string on)
         {
-            cmd.Join.Add(string.Format(" right outer join {0} on {1}", table, on));
+            cmd.Join.Add(string.Format(" right outer join [{0}] on {1}", table, on));
             return this;
         }
         /// <summary>
@@ -166,7 +170,7 @@ namespace Snow.Orm
             {
                 cmd.Where.Add(" and ");
             }
-            cmd.Where.Add(string.Format(" {0} like '%{1}%'", field, arg));
+            cmd.Where.Add(string.Format(" [{0}] like '%{1}%'", field, arg));
             return this;
         }
         /// <summary>
@@ -181,7 +185,7 @@ namespace Snow.Orm
             {
                 cmd.Where.Add(" and ");
             }
-            cmd.Where.Add(string.Format(" {0} like '{1}%'", field, arg));
+            cmd.Where.Add(string.Format(" [{0}] like '{1}%'", field, arg));
             return this;
         }
         /// <summary>
@@ -198,7 +202,7 @@ namespace Snow.Orm
                 {
                     cmd.Where.Add(" and ");
                 }
-                cmd.Where.Add(string.Format("{0} in (", field));
+                cmd.Where.Add(string.Format("[{0}] in (", field));
                 cmd.Where.Add(string.Join(",", args));
                 cmd.Where.Add(")");
             }
@@ -218,7 +222,7 @@ namespace Snow.Orm
                 {
                     cmd.Where.Add(" and ");
                 }
-                cmd.Where.Add(string.Format("{0} not in (", field));
+                cmd.Where.Add(string.Format("[{0}] not in (", field));
                 cmd.Where.Add(string.Join(",", args));
                 cmd.Where.Add(")");
             }
@@ -313,7 +317,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Db Table(string table)
         {
-            cmd.Table = table;
+            cmd.Table = _getName(table);
             return this;
         }
 
