@@ -1,5 +1,5 @@
 ﻿
-namespace Snow.Orm
+namespace Snow
 {
     public class NativeDb
     {

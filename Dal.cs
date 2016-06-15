@@ -7,9 +7,9 @@ using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Snow.Orm
+namespace Snow
 {
-    public partial class Db : NativeDb
+    public partial class Orm : NativeDb
     {
         #region 公共方法
         /// <summary>
@@ -21,7 +21,7 @@ namespace Snow.Orm
         public Result Get<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
 
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             
             try
             {
@@ -30,12 +30,12 @@ namespace Snow.Orm
                     // 读取一条记录
                     cmd.Top = 1;
                     // 查询准备
-                    this._query<T>(model);
+                    this.query<T>(model);
                     // 构造命令
                     this.createSql();
                 }
                 //
-                this.model(model);
+                this.getModel(model);
             }
             catch (Exception e)
             {
@@ -46,7 +46,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
             return result;
         }
@@ -59,13 +59,13 @@ namespace Snow.Orm
         /// <returns></returns>
         public Result Find<T>(List<T> model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0) where T : class,new()
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
                 {
                     // 查询准备
-                    this._query<T>();
+                    this.query<T>();
                     // 构造命令
                     this.createSql();
                 }
@@ -73,9 +73,9 @@ namespace Snow.Orm
                 if (result.status == 200)
                 {
                     //
-                    DataSet ds = this._dataSet();
+                    DataSet ds = this.getDataSet();
 
-                    this.DataTable2List(model, ds.Tables[0]);
+                    this.dataTable2List(model, ds.Tables[0]);
                 }
 
             }
@@ -88,7 +88,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
 
 
@@ -107,12 +107,12 @@ namespace Snow.Orm
                 if (!this.cmd.IsNative)
                 {
                     // 查询准备
-                    this._query<T>();
+                    this.query<T>();
                     // 构造命令
                     this.createSql();
                 }
 
-                return this._dataSet();
+                return this.getDataSet();
             }
             catch (Exception e)
             {
@@ -122,7 +122,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
         }
 
@@ -134,7 +134,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Result Insert<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 // 获取对象的类型
@@ -147,7 +147,7 @@ namespace Snow.Orm
                     // 插入
                     cmd.Command = Command.Insert;
                     // 表名
-                    this._getTableName(m_type);
+                    this.getTableName(m_type);
 
                     // 如果没有指定返回列，则返回传入参数对象的全部列
                     if (cmd.Fields.Count == 0)
@@ -207,7 +207,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
 
             return result;
@@ -215,7 +215,7 @@ namespace Snow.Orm
 
         public Result Insert<T>(List<T> model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
 
             try
             {
@@ -236,7 +236,7 @@ namespace Snow.Orm
                     // 获取对象的类型
                     Type m_type = typeof(T);
                     // 表名
-                    this._getTableName(m_type);
+                    this.getTableName(m_type);
 
                     // 获取该对象的全部属性
                     PropertyInfo[] properties = m_type.GetProperties();
@@ -310,7 +310,7 @@ namespace Snow.Orm
             }
             finally
             {
-                this._finish();
+                this.finish();
             }
 
             return result;
@@ -323,7 +323,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Result Update<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -334,7 +334,7 @@ namespace Snow.Orm
                     // 获取对象的类型
                     Type m_type = typeof(T);
                     // 表名
-                    this._getTableName(m_type);
+                    this.getTableName(m_type);
 
                     // 获取该对象的全部属性
                     PropertyInfo[] properties = m_type.GetProperties();
@@ -381,7 +381,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
 
             return result;
@@ -395,7 +395,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Result Delete<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
@@ -407,7 +407,7 @@ namespace Snow.Orm
                     Type m_type = typeof(T);
                     //Type m_type = model.GetType();
                     // 表名
-                    this._getTableName(m_type);
+                    this.getTableName(m_type);
 
                     this.createSql();
                 }
@@ -425,7 +425,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
 
             return result;
@@ -438,13 +438,13 @@ namespace Snow.Orm
         /// <returns></returns>
         public bool Exists<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
                 {
                     // 查询准备
-                    this._query<T>();
+                    this.query<T>();
                     // 构造命令
                     this.createSql();
                 }
@@ -464,7 +464,7 @@ namespace Snow.Orm
                 // 调试
                 this.trace(this.GetSql());
 
-                this._finish();
+                this.finish();
             }
         }
         /// <summary>
@@ -475,14 +475,14 @@ namespace Snow.Orm
         /// <returns></returns>
         public Int64 Count<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
                 {
                     this.cmd.Fields.Add("count(1)");
                     // 查询准备
-                    this._query<T>();
+                    this.query<T>();
                     // 构造命令
                     this.createSql();
                 }
@@ -503,7 +503,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
         }
         /// <summary>
@@ -514,13 +514,13 @@ namespace Snow.Orm
         /// <returns></returns>
         public object Single<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (!this.cmd.IsNative)
                 {
                     // 查询准备
-                    this._query<T>();
+                    this.query<T>();
                     // 构造命令
                     this.createSql();
                 }
@@ -539,7 +539,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
         }
         /// <summary>
@@ -548,7 +548,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public int Exec([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             try
             {
                 if (this.cmd.IsNative)
@@ -572,7 +572,7 @@ namespace Snow.Orm
             {
                 // 调试
                 this.trace(this.GetSql());
-                this._finish();
+                this.finish();
             }
         }
 
@@ -586,7 +586,7 @@ namespace Snow.Orm
         /// <returns></returns>
         public Result Procedure<T>(string procedureName, T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0, params Direction[] direction)
         {
-            this._prepare(filePath, methodName, lineNumber);
+            this.prepare(filePath, methodName, lineNumber);
             // 
             if (string.IsNullOrWhiteSpace(procedureName))
             {
@@ -673,7 +673,7 @@ namespace Snow.Orm
                 }
                 finally
                 {
-                    this._finish();
+                    this.finish();
                 }
             }
             return result;
@@ -686,7 +686,7 @@ namespace Snow.Orm
         /// <summary>
         /// 预处理
         /// </summary>
-        private void _prepare(string filePath, string methodName, int lineNumber)
+        private void prepare(string filePath, string methodName, int lineNumber)
         {
             result = new Result();
 
@@ -697,12 +697,12 @@ namespace Snow.Orm
         /// <summary>
         /// 结束处理
         /// </summary>
-        private void _finish()
+        private void finish()
         {
             this.cmd = new Sql();
         }
 
-        private void _getTableName(Type type)
+        private void getTableName(Type type)
         {
 
             if (string.IsNullOrWhiteSpace(cmd.Table))
@@ -710,25 +710,25 @@ namespace Snow.Orm
                 TableAttribute t_attr = type.GetCustomAttribute(typeof(TableAttribute), false) as TableAttribute;
                 if (t_attr == null)
                 {
-                    cmd.Table = _getName(type.Name);
+                    cmd.Table = getName(type.Name);
                 }
                 else
                 {
-                    cmd.Table = _getName(t_attr.Name);
+                    cmd.Table = getName(t_attr.Name);
                 }
             }
         }
-        private string _getName(string str) {
+        private string getName(string str) {
             return "[" + str + "]";
         }
-        private void _query<T>(T model = default(T))
+        private void query<T>(T model = default(T))
         {
             cmd.Command = Command.Select;
 
             // 获取对象的类型
             Type m_type = typeof(T);
             // 表名
-            this._getTableName(m_type);
+            this.getTableName(m_type);
 
             // 如果没有指定返回列，则返回传入参数对象的全部列
             if (cmd.Fields.Count == 0)
@@ -743,7 +743,7 @@ namespace Snow.Orm
                     {
                         continue;
                     }
-                    cmd.Fields.Add(_getName(properties[i].Name.ToLower()));
+                    cmd.Fields.Add(getName(properties[i].Name.ToLower()));
                     //
                     //properties[i].GetValue(model);
                 }
@@ -754,7 +754,7 @@ namespace Snow.Orm
         /// 获取一个记录集
         /// </summary>
         /// <returns></returns>
-        private DataSet _dataSet()
+        private DataSet getDataSet()
         {
             parameters = this.cmd.Params.ToArray();
 
@@ -766,13 +766,13 @@ namespace Snow.Orm
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
-        private void model<T>(T model)
+        private void getModel<T>(T model)
         {
-            DataSet ds = this._dataSet();
+            DataSet ds = this.getDataSet();
 
             if (ds.Tables[0].Rows.Count > 0)
             {
-                DataRow2Model(model, ds.Tables[0].Rows[0]);
+                dataRow2Model(model, ds.Tables[0].Rows[0]);
             }
             else
             {
@@ -782,7 +782,7 @@ namespace Snow.Orm
         /// <summary>
         /// 构造select命令
         /// </summary>
-        private void _select()
+        private void select()
         {
             // 命令
             cmd.SqlString.Clear();
@@ -919,7 +919,7 @@ namespace Snow.Orm
         /// <summary>
         /// 构造insert命令
         /// </summary>
-        private void _insert()
+        private void insert()
         {
             // 命令
             cmd.SqlString.Clear();
@@ -956,7 +956,7 @@ namespace Snow.Orm
         /// <summary>
         /// 构造update命令
         /// </summary>
-        private void _update()
+        private void update()
         {
             // 命令
             cmd.SqlString.Clear();
@@ -995,7 +995,7 @@ namespace Snow.Orm
         /// <summary>
         /// 构造delete命令
         /// </summary>
-        private void _delete()
+        private void delete()
         {
             // 命令
             cmd.SqlString.Clear();
@@ -1023,13 +1023,13 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="dt"></param>
-        private void DataTable2List<T>(List<T> model, DataTable dt) where T : class,new()
+        private void dataTable2List<T>(List<T> model, DataTable dt) where T : class,new()
         {
             foreach (DataRow row in dt.Rows)
             {
                 T m_t = new T();
 
-                this.DataRow2Model(m_t, row);
+                this.dataRow2Model(m_t, row);
 
                 model.Add(m_t);
             }
@@ -1040,7 +1040,7 @@ namespace Snow.Orm
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="row"></param>
-        private void DataRow2Model<T>(T model, DataRow row)
+        private void dataRow2Model<T>(T model, DataRow row)
         {
             // 获取对象的类型
             Type m_type = model.GetType();

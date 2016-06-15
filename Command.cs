@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace Snow.Orm
+namespace Snow
 {
     class Sql
     {

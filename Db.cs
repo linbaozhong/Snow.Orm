@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace Snow.Orm
+namespace Snow
 {
-    public partial class Db : NativeDb
+    public partial class Orm : NativeDb
     {
         #region 属性
         Sql cmd;
@@ -42,11 +42,13 @@ namespace Snow.Orm
         /// </summary>
         //SqlParameter[] _parameters;
 
+
+        public static Orm DB = new Orm();
         #endregion
 
         #region 公共方法
 
-        public Db()
+        private Orm()
         {
             this.cmd = new Sql();
         }
@@ -56,7 +58,7 @@ namespace Snow.Orm
         /// <param name="key">主键字段名</param>
         /// <param name="args">参数值</param>
         /// <returns></returns>
-        public Db Id(string key, object arg)
+        public Orm Id(string key, object arg)
         {
             this.cmd.IsKey = true;
 
@@ -71,7 +73,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="n">前n个记录</param>
         /// <returns></returns>
-        public Db Top(int n)
+        public Orm Top(int n)
         {
             if (n <= 1)
             {
@@ -86,7 +88,7 @@ namespace Snow.Orm
         /// <param name="table">表名</param>
         /// <param name="on">联结条件</param>
         /// <returns></returns>
-        public Db Inner(string table, string on)
+        public Orm Inner(string table, string on)
         {
             cmd.Join.Add(string.Format(" inner join [{0}] on {1}", table, on));
             return this;
@@ -97,7 +99,7 @@ namespace Snow.Orm
         /// <param name="table">表名</param>
         /// <param name="on">联结条件</param>
         /// <returns></returns>
-        public Db Left(string table, string on)
+        public Orm Left(string table, string on)
         {
             cmd.Join.Add(string.Format(" left outer join [{0}] on {1}", table, on));
             return this;
@@ -108,7 +110,7 @@ namespace Snow.Orm
         /// <param name="table">表名</param>
         /// <param name="on">联结条件</param>
         /// <returns></returns>
-        public Db Right(string table, string on)
+        public Orm Right(string table, string on)
         {
             cmd.Join.Add(string.Format(" right outer join [{0}] on {1}", table, on));
             return this;
@@ -119,7 +121,7 @@ namespace Snow.Orm
         /// <param name="condition">查询条件,例如: name = ? </param>
         /// <param name="args">参数值</param>
         /// <returns></returns>
-        public Db Where(string condition, params object[] args)
+        public Orm Where(string condition, params object[] args)
         {
             if (cmd.Where.Count > 0)
             {
@@ -134,7 +136,7 @@ namespace Snow.Orm
         /// <param name="condition">查询条件,例如: name = ? </param>
         /// <param name="args">参数值</param>
         /// <returns></returns>
-        public Db And(string condition, params object[] args)
+        public Orm And(string condition, params object[] args)
         {
             if (cmd.Where.Count > 0)
             {
@@ -149,7 +151,7 @@ namespace Snow.Orm
         /// <param name="condition">查询条件,例如: name = ? </param>
         /// <param name="args">参数值</param>
         /// <returns></returns>
-        public Db Or(string condition, params object[] args)
+        public Orm Or(string condition, params object[] args)
         {
             if (cmd.Where.Count > 0)
             {
@@ -164,7 +166,7 @@ namespace Snow.Orm
         /// <param name="field"></param>
         /// <param name="arg"></param>
         /// <returns></returns>
-        public Db Like(string field, string arg)
+        public Orm Like(string field, string arg)
         {
             if (cmd.Where.Count > 0)
             {
@@ -179,7 +181,7 @@ namespace Snow.Orm
         /// <param name="field">字段名</param>
         /// <param name="arg">参数</param>
         /// <returns></returns>
-        public Db StartsWith(string field, string arg)
+        public Orm StartsWith(string field, string arg)
         {
             if (cmd.Where.Count > 0)
             {
@@ -194,7 +196,7 @@ namespace Snow.Orm
         /// <param name="field">字段名</param>
         /// <param name="args">参数值</param>
         /// <returns></returns>
-        public Db In(string field, params object[] args)
+        public Orm In(string field, params object[] args)
         {
             if (args.Length > 0)
             {
@@ -214,7 +216,7 @@ namespace Snow.Orm
         /// <param name="field">字段名</param>
         /// <param name="args">参数值</param>
         /// <returns></returns>
-        public Db NotIn(string field, params object[] args)
+        public Orm NotIn(string field, params object[] args)
         {
             if (args.Length > 0)
             {
@@ -233,7 +235,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="asc"></param>
         /// <returns></returns>
-        public Db OrderBy(string asc)
+        public Orm OrderBy(string asc)
         {
             cmd.OrderBy.Add(asc);
             return this;
@@ -243,7 +245,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="desc"></param>
         /// <returns></returns>
-        public Db Desc(string desc)
+        public Orm Desc(string desc)
         {
             cmd.OrderBy.Add(desc + " desc");
             return this;
@@ -253,7 +255,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="asc"></param>
         /// <returns></returns>
-        public Db Asc(string asc)
+        public Orm Asc(string asc)
         {
             cmd.OrderBy.Add(asc + " asc");
             return this;
@@ -263,7 +265,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="cols">列名,多个字段名以逗号分隔</param>
         /// <returns></returns>
-        public Db Cols(params string[] cols)
+        public Orm Cols(params string[] cols)
         {
             cmd.Fields.Clear();
             cmd.Fields.AddRange(cols);
@@ -279,7 +281,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="cols">字段名参数</param>
         /// <returns></returns>
-        public Db Exclude(params string[] cols)
+        public Orm Exclude(params string[] cols)
         {
             cmd.ExcludeFields.Clear();
             cmd.ExcludeFields.AddRange(cols);
@@ -295,7 +297,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="groupby"></param>
         /// <returns></returns>
-        public Db GroupBy(string groupby)
+        public Orm GroupBy(string groupby)
         {
             cmd.GroupBy = groupby;
             return this;
@@ -305,7 +307,7 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="having"></param>
         /// <returns></returns>
-        public Db Having(string having)
+        public Orm Having(string having)
         {
             cmd.Having = having;
             return this;
@@ -315,9 +317,9 @@ namespace Snow.Orm
         /// </summary>
         /// <param name="table">表名</param>
         /// <returns></returns>
-        public Db Table(string table)
+        public Orm Table(string table)
         {
-            cmd.Table = _getName(table);
+            cmd.Table = getName(table);
             return this;
         }
 
@@ -327,7 +329,7 @@ namespace Snow.Orm
         ///// <param name="startIndex">起始行号</param>
         ///// <param name="endIndex">终止行号</param>
         ///// <returns></returns>
-        //public Db Page(int startIndex = 1, int endIndex = 10)
+        //public Orm Page(int startIndex = 1, int endIndex = 10)
         //{
         //    // 终止行号 必须大于 起始行号
         //    if (endIndex >= startIndex)
@@ -346,7 +348,7 @@ namespace Snow.Orm
         /// <param name="pageIndex">当前页码</param>
         /// <param name="pageSize">每页的记录数</param>
         /// <returns></returns>
-        public Db Page(int pageIndex, int pageSize)
+        public Orm Page(int pageIndex, int pageSize)
         {
             cmd.Page.pageIndex = pageIndex;
             cmd.Page.pageSize = pageSize;
@@ -374,7 +376,7 @@ namespace Snow.Orm
         /// <param name="sql"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public Db Sql(string sql, params object[] args)
+        public Orm Sql(string sql, params object[] args)
         {
             cmd.Where.Clear();
             cmd.Params.Clear();
@@ -414,16 +416,16 @@ namespace Snow.Orm
                 switch (cmd.Command.ToLower())
                 {
                     case "insert":
-                        this._insert();
+                        this.insert();
                         break;
                     case "update":
-                        this._update();
+                        this.update();
                         break;
                     case "delete":
-                        this._delete();
+                        this.delete();
                         break;
                     case "select":
-                        this._select();
+                        this.select();
                         break;
                     default:
                         break;

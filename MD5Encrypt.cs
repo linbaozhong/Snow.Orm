@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Snow.Orm
+namespace Snow
 {
     public class MD5Encrypt
     {
