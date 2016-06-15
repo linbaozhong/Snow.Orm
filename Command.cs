@@ -157,4 +157,13 @@ namespace Snow
         /// </summary>
         public object data { set; get; }
     }
+
+    class StaticSql
+    {
+        public string command { set; get; }
+
+        public SqlParameter[] parameters { set; get; }
+
+        public string[] fields { set; get; }
+    }
 }

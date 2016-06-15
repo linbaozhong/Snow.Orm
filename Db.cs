@@ -15,43 +15,52 @@ namespace Snow
         /// 查询参数
         /// </summary>
         SqlParameter[] parameters;
+
         /// <summary>
         /// Cache键
         /// </summary>
-        string cacheKay;
+        string cacheKey;
 
+        StaticSql staticSql;
         /// <summary>
-        /// 以id为条件，忽略其他条件和排序
+        /// 静态命令键
         /// </summary>
-        //bool IsKey = false;
-        /// <summary>
-        /// 是否原生命令
-        /// </summary>
-        //bool IsNative = false;
-        /// <summary>
-        /// 是否分页查询
-        /// </summary>
-        //bool _isPage = false;
+        string staticKey;
 
-        /// <summary>
-        ///  sql命令
-        /// </summary>
-        //string _sqlStr = string.Empty;
-        /// <summary>
-        /// 命令参数集合
-        /// </summary>
-        //SqlParameter[] _parameters;
+        public readonly static Orm DB = new Orm();
 
-
-        public static Orm DB = new Orm();
         #endregion
 
         #region 公共方法
 
-        private Orm()
+        public Orm()
         {
             this.cmd = new Sql();
         }
+
+        /// <summary>
+        /// 如果存在静态命令，使用静态命令
+        /// 否则，创建静态命令
+        /// </summary>
+        /// <param name="key">命令关键字(必须保证在当前应用唯一)</param>
+        /// <returns></returns>
+        public Orm Static(string key) {
+            this.staticKey = key;
+            this.staticSql = new StaticSql();
+            return this;
+        }
+        /// <summary>
+        /// 如果有cache，从cache中读取
+        /// 否则，远程获取数据并存入cache
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public Orm Cache(string key)
+        {
+            this.cacheKey = key;
+            return this;
+        }
+
         /// <summary>
         /// 主键查询(不支持复合主键)
         /// </summary>
@@ -323,24 +332,6 @@ namespace Snow
             return this;
         }
 
-        ///// <summary>
-        ///// 分页
-        ///// </summary>
-        ///// <param name="startIndex">起始行号</param>
-        ///// <param name="endIndex">终止行号</param>
-        ///// <returns></returns>
-        //public Orm Page(int startIndex = 1, int endIndex = 10)
-        //{
-        //    // 终止行号 必须大于 起始行号
-        //    if (endIndex >= startIndex)
-        //    {
-        //        cmd.Page.startIndex = startIndex;
-        //        cmd.Page.endIndex = endIndex;
-        //        //
-        //        cmd.IsPage = true;
-        //    }
-        //    return this;
-        //}
 
         /// <summary>
         /// 分页
@@ -404,6 +395,11 @@ namespace Snow
             }
             return _param;
         }
+
+        #endregion
+
+        #region 私有方法
+
         /// <summary>
         /// 构造sql命令
         /// </summary>
@@ -432,10 +428,6 @@ namespace Snow
                 }
             }
         }
-
-        #endregion
-
-        #region 私有方法
 
         /// <summary>
         /// 构造查询参数
@@ -475,16 +467,17 @@ namespace Snow
                 cmd.Where.Add(condition);
             }
         }
+
         /// <summary>
         /// 构造Select命令
         /// </summary>
-
         private void trace(object msg)
         {
             System.Diagnostics.Trace.WriteLine("");
             System.Diagnostics.Trace.WriteLine(msg);
             System.Diagnostics.Trace.WriteLine("");
         }
+
         #endregion
     }
 }

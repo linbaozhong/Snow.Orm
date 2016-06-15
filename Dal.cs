@@ -690,7 +690,7 @@ namespace Snow
         {
             result = new Result();
 
-            cacheKay = MD5Encrypt.Get32(filePath + "-" + methodName + "-" + lineNumber);
+            cacheKey = MD5Encrypt.Get32(filePath + "-" + methodName + "-" + lineNumber);
 
             result.data = filePath + "-" + methodName + "-" + lineNumber;
         }
