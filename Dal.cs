@@ -18,11 +18,11 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Get<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public Result Get<T>(T model)
         {
 
-            this.prepare(filePath, methodName, lineNumber);
-            
+            this.prepare(model);
+
             try
             {
                 if (!this.cmd.IsNative)
@@ -48,6 +48,7 @@ namespace Snow
                 this.trace(this.GetSql());
                 this.finish();
             }
+
             return result;
         }
 
@@ -57,9 +58,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Find<T>(List<T> model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0) where T : class,new()
+        public Result Find<T>(List<T> model) where T : class, new()
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (!this.cmd.IsNative)
@@ -132,9 +133,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Insert<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public Result Insert<T>(T model)
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 // 获取对象的类型
@@ -153,7 +154,7 @@ namespace Snow
                     if (cmd.Fields.Count == 0)
                     {
 
-                        for (int i = 0; i < properties.Length; i++)
+                        for (int i = 0, len = properties.Length; i < len; i++)
                         {
                             // 忽略排除字段
                             if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
@@ -184,7 +185,7 @@ namespace Snow
                 // 返回数据库自增关键字段值
                 DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
                 // 将自增字段值写入model
-                for (int i = 0; i < properties.Length; i++)
+                for (int i = 0, len = properties.Length; i < len; i++)
                 {
                     // 数据库自增字段
                     if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
@@ -213,9 +214,9 @@ namespace Snow
             return result;
         }
 
-        public Result Insert<T>(List<T> model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public Result Insert<T>(List<T> model)
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
 
             try
             {
@@ -246,7 +247,7 @@ namespace Snow
                     {
                         foreach (T item in model)
                         {
-                            for (int i = 0; i < properties.Length; i++)
+                            for (int i = 0, len = properties.Length; i < len; i++)
                             {
                                 // 忽略排除字段
                                 if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
@@ -287,7 +288,7 @@ namespace Snow
                     // 将自增字段值写入model
                     for (int t = 0; t < model.Count; t++)
                     {
-                        for (int i = 0; i < properties.Length; i++)
+                        for (int i = 0, len = properties.Length; i < len; i++)
                         {
                             // 数据库自增字段
                             if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
@@ -321,9 +322,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Update<T>(T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public Result Update<T>(T model)
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (!this.cmd.IsNative)
@@ -342,7 +343,7 @@ namespace Snow
                     // 如果没有指定更新列，则更新传入参数对象的全部列
                     if (cmd.Fields.Count == 0)
                     {
-                        for (int i = 0; i < properties.Length; i++)
+                        for (int i = 0, len = properties.Length; i < len; i++)
                         {
                             // 忽略排除字段
                             if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
@@ -357,7 +358,7 @@ namespace Snow
                     }
                     else
                     {
-                        for (int i = 0; i < properties.Length; i++)
+                        for (int i = 0, len = properties.Length; i < len; i++)
                         {
                             if (cmd.Fields.Contains(properties[i].Name.ToLower()))
                             {
@@ -393,9 +394,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Delete<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public Result Delete<T>()
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (!this.cmd.IsNative)
@@ -436,9 +437,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Exists<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public bool Exists<T>()
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (!this.cmd.IsNative)
@@ -473,9 +474,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Int64 Count<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public Int64 Count<T>()
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (!this.cmd.IsNative)
@@ -512,9 +513,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public object Single<T>([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public object Single<T>()
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (!this.cmd.IsNative)
@@ -546,9 +547,9 @@ namespace Snow
         /// 执行原生查询，返回受影响的行数
         /// </summary>
         /// <returns></returns>
-        public int Exec([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        public int Exec()
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             try
             {
                 if (this.cmd.IsNative)
@@ -584,9 +585,9 @@ namespace Snow
         /// <param name="model"></param>
         /// <param name="outputs">参数</param>
         /// <returns></returns>
-        public Result Procedure<T>(string procedureName, T model, [CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0, params Direction[] direction)
+        public Result Procedure<T>(string procedureName, T model, params Direction[] direction)
         {
-            this.prepare(filePath, methodName, lineNumber);
+            this.prepare();
             // 
             if (string.IsNullOrWhiteSpace(procedureName))
             {
@@ -613,7 +614,7 @@ namespace Snow
                         // 如果没有指定更新列，则更新传入参数对象的全部列
                         if (cmd.Fields.Count == 0)
                         {
-                            for (int i = 0; i < properties.Length; i++)
+                            for (int i = 0, len = properties.Length; i < len; i++)
                             {
                                 // 忽略排除字段
                                 if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
@@ -637,7 +638,7 @@ namespace Snow
                         }
                         else
                         {
-                            for (int i = 0; i < properties.Length; i++)
+                            for (int i = 0, len = properties.Length; i < len; i++)
                             {
                                 if (cmd.Fields.Contains(properties[i].Name.ToLower()))
                                 {
@@ -686,25 +687,50 @@ namespace Snow
         /// <summary>
         /// 预处理
         /// </summary>
-        private void prepare(string filePath, string methodName, int lineNumber)
+        private Table prepare<T>(T model = default(T))
+        {
+            prepare();
+
+            Type _type = typeof(T);
+            string _guid = _type.GUID.ToString();
+
+            // 读取cache
+            object _obj = DataCache.GetCache(_guid);
+
+            if (_obj == null)
+            {
+                _obj = table;
+
+                // 取表名
+                table.Name = getTableName(_type);
+                // 字段
+                table.Fields = getFields(_type);
+                
+                DataCache.SetCache(_guid, _obj);
+            }
+            return _obj as Table;
+        }
+        private void prepare()
         {
             result = new Result();
-
-            cacheKey = MD5Encrypt.Get32(filePath + "-" + methodName + "-" + lineNumber);
-
-            result.data = filePath + "-" + methodName + "-" + lineNumber;
         }
         /// <summary>
         /// 结束处理
         /// </summary>
         private void finish()
         {
+            // 
+
+
             this.cmd = new Sql();
         }
-
-        private void getTableName(Type type)
+        /// <summary>
+        /// 读取映射的表名
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        string getTableName(Type type)
         {
-
             if (string.IsNullOrWhiteSpace(cmd.Table))
             {
                 TableAttribute t_attr = type.GetCustomAttribute(typeof(TableAttribute), false) as TableAttribute;
@@ -717,8 +743,31 @@ namespace Snow
                     cmd.Table = getName(t_attr.Name);
                 }
             }
+
+            return cmd.Table;
         }
-        private string getName(string str) {
+        /// <summary>
+        /// 读取全部映射字段
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        string[] getFields(Type type)
+        {
+            // 获取该对象的全部属性
+            PropertyInfo[] properties = type.GetProperties();
+
+            int len = properties.Length;
+            string[] _fields = new string[len];
+
+            for (int i = 0; i < len; i++)
+            {
+                _fields[i] = properties[i].Name.ToLower();
+            }
+
+            return _fields;
+        }
+        private string getName(string str)
+        {
             return "[" + str + "]";
         }
         private void query<T>(T model = default(T))
@@ -727,26 +776,37 @@ namespace Snow
 
             // 获取对象的类型
             Type m_type = typeof(T);
-            // 表名
-            this.getTableName(m_type);
+            //// 表名
+            //this.getTableName(m_type);
 
             // 如果没有指定返回列，则返回传入参数对象的全部列
             if (cmd.Fields.Count == 0)
             {
-                // 获取该对象的全部属性
-                PropertyInfo[] properties = m_type.GetProperties();
-
-                for (int i = 0; i < properties.Length; i++)
+                foreach (string field in table.Fields)
                 {
                     // 忽略排除字段
-                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field))
                     {
                         continue;
                     }
-                    cmd.Fields.Add(getName(properties[i].Name.ToLower()));
-                    //
-                    //properties[i].GetValue(model);
+                    cmd.Fields.Add(getName(field));
+
                 }
+                //// 获取该对象的全部属性
+                //PropertyInfo[] properties = m_type.GetProperties();
+
+                //for (int i = 0, len = properties.Length; i < len; i++)
+                //{
+
+                //    // 忽略排除字段
+                //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                //    {
+                //        continue;
+                //    }
+                //    cmd.Fields.Add(getName(properties[i].Name.ToLower()));
+                //    //
+                //    //properties[i].GetValue(model);
+                //}
             }
         }
 
@@ -1023,7 +1083,7 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="dt"></param>
-        private void dataTable2List<T>(List<T> model, DataTable dt) where T : class,new()
+        private void dataTable2List<T>(List<T> model, DataTable dt) where T : class, new()
         {
             foreach (DataRow row in dt.Rows)
             {
@@ -1050,15 +1110,20 @@ namespace Snow
             // 根据查询字段列，填充对象
             try
             {
+                // 对象属性名
+                string _propertyName;
+                // 遍历对象属性，并按需赋值
                 foreach (PropertyInfo p in properties)
                 {
-                    if (!cmd.Fields.Contains(p.Name.ToLower()) || Convert.IsDBNull(row[p.Name]) || row[p.Name].ToString() == "")
+                    _propertyName = p.Name.ToLower();
+
+                    if (!cmd.Fields.Contains(_propertyName) || Convert.IsDBNull(row[_propertyName]) || row[_propertyName].ToString() == "")
                     {
                         continue;
                     }
                     else
                     {
-                        p.SetValue(model, Convert.ChangeType(row[p.Name], p.PropertyType), null);
+                        p.SetValue(model, Convert.ChangeType(row[_propertyName], p.PropertyType), null);
                     }
                 }
             }
@@ -1071,6 +1136,31 @@ namespace Snow
 
         }
 
+        private Dictionary<string,object> dataRow2Model(DataRow row)
+        {
+            Dictionary<string, object> model = new Dictionary<string, object>();
+            
+            try
+            {
+                foreach (var field in table.Fields)
+                {
+                    if (!cmd.Fields.Contains(field) || Convert.IsDBNull(row[field]) || row[field].ToString() == "")
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        p.SetValue(model, Convert.ChangeType(row[_propertyName], p.PropertyType), null);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+            return model;
+        }
         #endregion
     }
 

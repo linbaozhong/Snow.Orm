@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
 
 namespace Snow
 {
     public partial class Orm : NativeDb
     {
         #region 属性
+        Table table;
         Sql cmd;
         /// <summary>
         /// 返回的结果
@@ -27,25 +29,26 @@ namespace Snow
         /// </summary>
         string staticKey;
 
-        public readonly static Orm DB = new Orm();
+        //public readonly static Orm DB = new Orm();
 
         #endregion
 
         #region 公共方法
 
-        public Orm()
+        public Orm([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
+            this.staticKey = MD5Encrypt.Get32(string.Concat(filePath,methodName,lineNumber));
+
             this.cmd = new Sql();
+            this.table = new Snow.Table();
         }
 
         /// <summary>
         /// 如果存在静态命令，使用静态命令
         /// 否则，创建静态命令
         /// </summary>
-        /// <param name="key">命令关键字(必须保证在当前应用唯一)</param>
         /// <returns></returns>
-        public Orm Static(string key) {
-            this.staticKey = key;
+        public Orm Static() {
             this.staticSql = new StaticSql();
             return this;
         }
