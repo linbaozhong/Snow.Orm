@@ -1,5 +1,6 @@
 ﻿using Snow.DBUtility;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
@@ -20,8 +21,7 @@ namespace Snow
         /// <returns></returns>
         public Result Get<T>(T model)
         {
-
-            this.prepare(model);
+            prepare();
 
             try
             {
@@ -31,6 +31,38 @@ namespace Snow
                     cmd.Top = 1;
                     // 查询准备
                     this.query<T>(model);
+                    // 构造命令
+                    this.createSql();
+                }
+                //
+                this.getModel(model);
+            }
+            catch (Exception e)
+            {
+                result.status = -1;
+                result.data = e;
+            }
+            finally
+            {
+                // 调试
+                this.trace(this.GetSql());
+                this.finish();
+            }
+
+            return result;
+        }
+        public Result Get_(BaseEntity model)
+        {
+            prepare();
+
+            try
+            {
+                if (!this.cmd.IsNative)
+                {
+                    // 读取一条记录
+                    cmd.Top = 1;
+                    // 查询准备
+                    this.query(model);
                     // 构造命令
                     this.createSql();
                 }
@@ -132,37 +164,36 @@ namespace Snow
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
-        /// <returns></returns>
+        /// <returns>以Dictionary类型返回自增字段ID，在result.data中</returns>
         public Result Insert<T>(T model)
         {
-            this.prepare();
+            this.tables = new Table[1] { prepare(model) };
             try
             {
-                // 获取对象的类型
-                Type m_type = typeof(T);
-                // 获取该对象的全部属性
-                PropertyInfo[] properties = m_type.GetProperties();
+                //// 获取对象的类型
+                //Type m_type = typeof(T);
+                //// 获取该对象的全部属性
+                //PropertyInfo[] properties = m_type.GetProperties();
 
                 if (!this.cmd.IsNative)
                 {
                     // 插入
                     cmd.Command = Command.Insert;
-                    // 表名
-                    this.getTableName(m_type);
+                    //// 表名
+                    //this.getTableName(m_type);
 
                     // 如果没有指定返回列，则返回传入参数对象的全部列
                     if (cmd.Fields.Count == 0)
                     {
-
-                        for (int i = 0, len = properties.Length; i < len; i++)
+                        foreach (var field in tables[0].Fields)
                         {
                             // 忽略排除字段
-                            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
                             {
                                 continue;
                             }
                             // 数据库自增字段
-                            if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                            if (field.IsDatabaseGenerated)
                             {
                                 SqlParameter idParameter = new SqlParameter("@id", 0);
                                 idParameter.Direction = ParameterDirection.Output;
@@ -171,11 +202,34 @@ namespace Snow
                             }
                             else
                             {
-                                cmd.Fields.Add(properties[i].Name.ToLower());
+                                cmd.Fields.Add(field.Name);
 
-                                cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
+                                cmd.Params.Add(new SqlParameter("@" + field.Name, field.Value));
                             }
                         }
+
+                        //for (int i = 0, len = properties.Length; i < len; i++)
+                        //{
+                        //    // 忽略排除字段
+                        //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                        //    {
+                        //        continue;
+                        //    }
+                        //    // 数据库自增字段
+                        //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                        //    {
+                        //        SqlParameter idParameter = new SqlParameter("@id", 0);
+                        //        idParameter.Direction = ParameterDirection.Output;
+
+                        //        cmd.Params.Add(idParameter);
+                        //    }
+                        //    else
+                        //    {
+                        //        cmd.Fields.Add(properties[i].Name.ToLower());
+
+                        //        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
+                        //    }
+                        //}
                     }
                     this.createSql();
                 }
@@ -184,20 +238,30 @@ namespace Snow
 
                 // 返回数据库自增关键字段值
                 DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
-                // 将自增字段值写入model
-                for (int i = 0, len = properties.Length; i < len; i++)
+                // 将自增字段值写入返回值字典
+                int len = tables[0].Fields.Length;
+                Dictionary<string, object> returnVal = new Dictionary<string, object>();
+                for (int i = 0; i < len; i++)
                 {
-                    // 数据库自增字段
-                    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                    if (tables[0].Fields[i].IsDatabaseGenerated)
                     {
-                        switch (properties[i].PropertyType.Name)
-                        {
-                            case "Int64":
-                                properties[i].SetValue(model, Convert.ToInt64(cmd.Params[i].Value));
-                                break;
-                        }
+                        returnVal.Add(tables[0].Fields[i].Name, cmd.Params[i].Value);
                     }
                 }
+                result.data = returnVal;
+                //for (int i = 0, len = properties.Length; i < len; i++)
+                //{
+                //    // 数据库自增字段
+                //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                //    {
+                //        switch (properties[i].PropertyType.Name)
+                //        {
+                //            case "Int64":
+                //                properties[i].SetValue(model, Convert.ToInt64(cmd.Params[i].Value));
+                //                break;
+                //        }
+                //    }
+                //}
             }
             catch (Exception e)
             {
@@ -216,7 +280,7 @@ namespace Snow
 
         public Result Insert<T>(List<T> model)
         {
-            this.prepare();
+            this.tables = prepare(model);
 
             try
             {
@@ -236,27 +300,50 @@ namespace Snow
                     cmd.Command = Command.Insert;
                     // 获取对象的类型
                     Type m_type = typeof(T);
-                    // 表名
-                    this.getTableName(m_type);
+                    //// 表名
+                    //this.getTableName(m_type);
 
-                    // 获取该对象的全部属性
-                    PropertyInfo[] properties = m_type.GetProperties();
+                    //// 获取该对象的全部属性
+                    //PropertyInfo[] properties = m_type.GetProperties();
 
                     // 如果没有指定返回列，则返回传入参数对象的全部列
                     if (cmd.Fields.Count == 0)
                     {
-                        foreach (T item in model)
+                        foreach (var table in this.tables)
                         {
-                            for (int i = 0, len = properties.Length; i < len; i++)
+                            //for (int i = 0, len = properties.Length; i < len; i++)
+                            //{
+                            //    // 忽略排除字段
+                            //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                            //    {
+                            //        continue;
+                            //    }
+
+                            //    // 忽略数据库自增字段
+                            //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                            //    {
+                            //        SqlParameter idParameter = new SqlParameter("@id", 0);
+                            //        idParameter.Direction = ParameterDirection.Output;
+
+                            //        cmd.Params.Add(idParameter);
+                            //    }
+                            //    else
+                            //    {
+                            //        cmd.Fields.Add(properties[i].Name.ToLower());
+
+                            //        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(item)));
+                            //    }
+                            //}
+
+                            foreach (var field in table.Fields)
                             {
                                 // 忽略排除字段
-                                if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+                                if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
                                 {
                                     continue;
                                 }
-
-                                // 忽略数据库自增字段
-                                if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                                // 数据库自增字段
+                                if (field.IsDatabaseGenerated)
                                 {
                                     SqlParameter idParameter = new SqlParameter("@id", 0);
                                     idParameter.Direction = ParameterDirection.Output;
@@ -265,9 +352,9 @@ namespace Snow
                                 }
                                 else
                                 {
-                                    cmd.Fields.Add(properties[i].Name.ToLower());
+                                    cmd.Fields.Add(field.Name);
 
-                                    cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(item)));
+                                    cmd.Params.Add(new SqlParameter("@" + field.Name, field.Value));
                                 }
                             }
 
@@ -285,23 +372,44 @@ namespace Snow
                         }
                     }
                     DbHelperSQL.ExecuteSqlTran(l_command);
-                    // 将自增字段值写入model
-                    for (int t = 0; t < model.Count; t++)
+
+
+                    //// 将自增字段值写入model
+                    //for (int t = 0; t < model.Count; t++)
+                    //{
+                    //    for (int i = 0, len = properties.Length; i < len; i++)
+                    //    {
+                    //        // 数据库自增字段
+                    //        if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                    //        {
+                    //            switch (properties[i].PropertyType.Name)
+                    //            {
+                    //                case "Int64":
+                    //                    properties[i].SetValue(model[t], Convert.ToInt64(l_command[t].Parameters[i].Value));
+                    //                    break;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+
+                    List<Dictionary<string, object>> returnVals = new List<Dictionary<string, object>>();
+                    for (int t = 0; t < this.tables.Length; t++)
                     {
-                        for (int i = 0, len = properties.Length; i < len; i++)
+                        // 将自增字段值写入返回值字典
+                        int len = tables[t].Fields.Length;
+                        Dictionary<string, object> returnVal = new Dictionary<string, object>();
+                        for (int i = 0; i < len; i++)
                         {
-                            // 数据库自增字段
-                            if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+                            if (tables[0].Fields[i].IsDatabaseGenerated)
                             {
-                                switch (properties[i].PropertyType.Name)
-                                {
-                                    case "Int64":
-                                        properties[i].SetValue(model[t], Convert.ToInt64(l_command[t].Parameters[i].Value));
-                                        break;
-                                }
+                                returnVal.Add(tables[0].Fields[i].Name, cmd.Params[i].Value);
                             }
                         }
+
+                        returnVals.Add(returnVal);
                     }
+                    result.data = returnVals;
+
                 }
             }
             catch (Exception e)
@@ -687,25 +795,50 @@ namespace Snow
         /// <summary>
         /// 预处理
         /// </summary>
-        private Table prepare<T>(T model = default(T))
+        private Table prepare(BaseEntity model)
+        {
+            prepare();
+            return getTable(model);
+        }
+        private Table[] prepare(List<BaseEntity> model)
         {
             prepare();
 
-            Type _type = typeof(T);
-            string _guid = _type.GUID.ToString();
+            string _guid = model.GetType().GUID.ToString();
 
             // 读取cache
             object _obj = DataCache.GetCache(_guid);
 
             if (_obj == null)
             {
-                _obj = table;
+                int len = model.Count;
+                Table[] _tables = new Table[len];
 
-                // 取表名
-                table.Name = getTableName(_type);
-                // 字段
-                table.Fields = getFields(_type);
-                
+                for (int i = 0; i < len; i++)
+                {
+                    _tables[i] = getTable(model[i]);
+                }
+
+                _obj = _tables;
+
+                DataCache.SetCache(_guid, _obj);
+            }
+
+            return _obj as Table[];
+        }
+        private Table getTable(BaseEntity model)
+        {
+            string _guid = model.GetType().GUID.ToString();
+
+            // 读取cache
+            object _obj = DataCache.GetCache(_guid);
+
+            if (_obj == null)
+            {
+                getFields(model);
+
+                _obj = model;
+
                 DataCache.SetCache(_guid, _obj);
             }
             return _obj as Table;
@@ -719,9 +852,6 @@ namespace Snow
         /// </summary>
         private void finish()
         {
-            // 
-
-
             this.cmd = new Sql();
         }
         /// <summary>
@@ -751,20 +881,31 @@ namespace Snow
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        string[] getFields(Type type)
+        void getFields(BaseEntity model)
         {
             // 获取该对象的全部属性
-            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo[] properties = model.GetType().GetProperties();
 
-            int len = properties.Length;
-            string[] _fields = new string[len];
+            //int len = properties.Length;
+            //Column[] _fields = new Column[len];
+            IDictionary dict = model.GetEntity;
 
-            for (int i = 0; i < len; i++)
+            foreach (PropertyInfo _property in properties)
             {
-                _fields[i] = properties[i].Name.ToLower();
-            }
+                if (dict.Contains( _property.Name.ToLower()))
+                {
+                    continue;
+                }
 
-            return _fields;
+                dict[_property.Name.ToLower()] = _property.GetValue(model);
+
+                //// 数据库自增字段
+                //_fields[i] = new Column(
+                //    _property.Name.ToLower(),
+                //    _property.PropertyType,
+                //    _property.GetValue(model),
+                //    _property.IsDefined(typeof(DatabaseGeneratedAttribute), false));
+            }
         }
         private string getName(string str)
         {
@@ -782,14 +923,14 @@ namespace Snow
             // 如果没有指定返回列，则返回传入参数对象的全部列
             if (cmd.Fields.Count == 0)
             {
-                foreach (string field in table.Fields)
+                foreach (var field in tables[0].Fields)
                 {
                     // 忽略排除字段
-                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field))
+                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
                     {
                         continue;
                     }
-                    cmd.Fields.Add(getName(field));
+                    cmd.Fields.Add(getName(field.Name));
 
                 }
                 //// 获取该对象的全部属性
@@ -810,6 +951,32 @@ namespace Snow
             }
         }
 
+        private void query(BaseEntity model)
+        {
+            cmd.Command = Command.Select;
+
+            this.trace(model.TableName);
+
+            foreach (DictionaryEntry item in model)
+            {
+                this.trace(string.Format("name:{0} , value:{1}", item.Key, item.Value));
+            }
+            // 如果没有指定返回列，则返回传入参数对象的全部列
+            if (cmd.Fields.Count == 0)
+            {
+                foreach (DictionaryEntry field in model)
+                {
+                    // 忽略排除字段
+                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Key.ToString()))
+                    {
+                        continue;
+                    }
+                    cmd.Fields.Add(getName(field.Key.ToString()));
+
+                }
+            }
+        }
+
         /// <summary>
         /// 获取一个记录集
         /// </summary>
@@ -826,18 +993,16 @@ namespace Snow
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
-        private void getModel<T>(T model)
+        private void getModel(BaseEntity model)
         {
             DataSet ds = this.getDataSet();
 
-            if (ds.Tables[0].Rows.Count > 0)
+            if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
             {
-                dataRow2Model(model, ds.Tables[0].Rows[0]);
+                return;
             }
-            else
-            {
-                model = default(T);
-            }
+
+            dataRow2Model(model, ds.Tables[0].Rows[0]);
         }
         /// <summary>
         /// 构造select命令
@@ -1100,22 +1265,17 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="row"></param>
-        private void dataRow2Model<T>(T model, DataRow row)
+        private void dataRow2Model(BaseEntity model, DataRow row)
         {
-            // 获取对象的类型
-            Type m_type = model.GetType();
-            // 获取该对象的全部属性
-            PropertyInfo[] properties = m_type.GetProperties();
-
             // 根据查询字段列，填充对象
             try
             {
                 // 对象属性名
                 string _propertyName;
                 // 遍历对象属性，并按需赋值
-                foreach (PropertyInfo p in properties)
+                foreach (DictionaryEntry p in model)
                 {
-                    _propertyName = p.Name.ToLower();
+                    _propertyName = p.Key.ToString().ToLower();
 
                     if (!cmd.Fields.Contains(_propertyName) || Convert.IsDBNull(row[_propertyName]) || row[_propertyName].ToString() == "")
                     {
@@ -1123,7 +1283,8 @@ namespace Snow
                     }
                     else
                     {
-                        p.SetValue(model, Convert.ChangeType(row[_propertyName], p.PropertyType), null);
+                        //p.SetValue(model, Convert.ChangeType(row[_propertyName], p.PropertyType), null);
+                        p[_propertyName] = Convert.ChangeType(row[_propertyName], p.PropertyType);
                     }
                 }
             }
@@ -1136,21 +1297,21 @@ namespace Snow
 
         }
 
-        private Dictionary<string,object> dataRow2Model(DataRow row)
+        private Dictionary<string, object> dataRow2Model(DataRow row)
         {
             Dictionary<string, object> model = new Dictionary<string, object>();
-            
+
             try
             {
-                foreach (var field in table.Fields)
+                foreach (var field in tables[0].Fields)
                 {
-                    if (!cmd.Fields.Contains(field) || Convert.IsDBNull(row[field]) || row[field].ToString() == "")
+                    if (!cmd.Fields.Contains(field.Name) || Convert.IsDBNull(row[field.Name]) || row[field.Name].ToString() == "")
                     {
                         continue;
                     }
                     else
                     {
-                        p.SetValue(model, Convert.ChangeType(row[_propertyName], p.PropertyType), null);
+                        model.Add(field.Name, row[field.Name]);
                     }
                 }
             }

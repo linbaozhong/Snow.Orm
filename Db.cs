@@ -7,7 +7,9 @@ namespace Snow
     public partial class Orm : NativeDb
     {
         #region 属性
-        Table table;
+
+        Table[] tables;
+
         Sql cmd;
         /// <summary>
         /// 返回的结果
@@ -40,7 +42,6 @@ namespace Snow
             this.staticKey = MD5Encrypt.Get32(string.Concat(filePath,methodName,lineNumber));
 
             this.cmd = new Sql();
-            this.table = new Snow.Table();
         }
 
         /// <summary>

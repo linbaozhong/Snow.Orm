@@ -32,7 +32,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,16 +43,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command.cs" />
+    <Compile Include="Common\DataCache.cs" />
+    <Compile Include="Common\DESEncrypt.cs" />
+    <Compile Include="Common\MD5Encrypt.cs" />
     <Compile Include="Dal.cs" />
     <Compile Include="Db.cs" />
+    <Compile Include="DBUtility\CommandInfo.cs" />
+    <Compile Include="DBUtility\DbHelperSQL.cs" />
+    <Compile Include="DBUtility\PubConstant.cs" />
     <Compile Include="NativeDb.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Shangshebao.DBUtility\Shangshebao.DBUtility.csproj">
-      <Project>{0988c62e-247f-471f-a183-db509c7a3839}</Project>
-      <Name>Shangshebao.DBUtility</Name>
-    </ProjectReference>
+    <Content Include="Documents\readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
