@@ -16,6 +16,33 @@ namespace Snow
         /// <returns></returns>
         public DataRow Row(BaseEntity model)
         {
+            prepare(model);
+            DataRow row = _Row(model);
+            finish();
+
+            return row;
+        }
+        /// <summary>
+        /// 获取多行数据
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public DataRow[] Rows(BaseEntity model)
+        {
+            prepare(model);
+            DataRow[] rows = _Rows(model);
+            finish();
+
+            return rows;
+        }
+
+        /// <summary>
+        /// 获取单行数据
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private DataRow _Row(BaseEntity model)
+        {
             DataSet ds = this.Find(model, 1);
 
             if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
@@ -24,8 +51,12 @@ namespace Snow
             }
             return ds.Tables[0].Rows[0];
         }
-
-        public DataRow[] Rows(BaseEntity model)
+        /// <summary>
+        /// 获取多行数据
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private DataRow[] _Rows(BaseEntity model)
         {
             DataSet ds = this.Find(model);
 
@@ -35,5 +66,6 @@ namespace Snow
             }
             return ds.Tables[0].Select();
         }
+
     }
 }

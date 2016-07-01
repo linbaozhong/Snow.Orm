@@ -10,15 +10,46 @@ namespace Snow
 {
     public partial class Orm : NativeDb
     {
-        public void Entity(BaseEntity model)
+        public void Model(BaseEntity model)
         {
-            dataRow2Model(Row(model), model);
+            prepare(model);
+            _Model(_Row(model), model);
+            finish();
         }
 
+        public List<BaseEntity> List(BaseEntity model)
+        {
+            prepare(model);
+            List<BaseEntity> _list = _List(_Rows(model), model);
+            finish();
 
-        private void dataRow2Model(DataRow row, BaseEntity model)
+            return _list;
+        }
+
+        /// <summary>
+        /// table转list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model"></param>
+        /// <param name="dt"></param>
+        private List<BaseEntity> _List(DataRow[] rows, BaseEntity model)
+        {
+            List<BaseEntity> _list = new List<BaseEntity>();
+
+            
+
+            foreach (DataRow row in rows)
+            {
+                _Model(row, model);
+
+                _list.Add(model);
+            }
+            return _list;
+        }
+        private void _Model(DataRow row, BaseEntity model)
         {
             model.Clear();
+
             try
             {
                 string _key;
