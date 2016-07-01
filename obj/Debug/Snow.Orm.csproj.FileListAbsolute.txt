@@ -17,3 +17,8 @@ F:\shangshebao\Snow.Orm\bin\Debug\Shangshebao.DBUtility.pdb
 F:\shangshebao\Snow.Orm\obj\Debug\Snow.Orm.csprojResolveAssemblyReference.cache
 F:\shangshebao\Snow.Orm\obj\Debug\Snow.Orm.dll
 F:\shangshebao\Snow.Orm\obj\Debug\Snow.Orm.pdb
+D:\Snow\Snow.Orm\obj\Debug\Snow.Orm.dll
+D:\Snow\Snow.Orm\obj\Debug\Snow.Orm.pdb
+D:\Snow\Snow.Orm\bin\Debug\Snow.Orm.dll
+D:\Snow\Snow.Orm\bin\Debug\Snow.Orm.pdb
+D:\Snow\Snow.Orm\obj\Debug\Snow.Orm.csprojResolveAssemblyReference.cache

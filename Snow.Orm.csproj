@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseEntity.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Common\DataCache.cs" />
     <Compile Include="Common\DESEncrypt.cs" />
@@ -51,8 +52,11 @@
     <Compile Include="DBUtility\CommandInfo.cs" />
     <Compile Include="DBUtility\DbHelperSQL.cs" />
     <Compile Include="DBUtility\PubConstant.cs" />
+    <Compile Include="GetRow.cs" />
+    <Compile Include="GetEntity.cs" />
     <Compile Include="NativeDb.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuntimeEntity.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Documents\readme.txt" />

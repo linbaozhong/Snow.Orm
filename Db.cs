@@ -8,7 +8,10 @@ namespace Snow
     {
         #region 属性
 
-        Table[] tables;
+        /// <summary>
+        /// 操作实体
+        /// </summary>
+        Table table = new Snow.Table();
 
         Sql cmd;
         /// <summary>
@@ -332,7 +335,8 @@ namespace Snow
         /// <returns></returns>
         public Orm Table(string table)
         {
-            cmd.Table = getName(table);
+            cmd.TableName = getName(table);
+            this.table.Name = table;
             return this;
         }
 
@@ -358,6 +362,8 @@ namespace Snow
         /// <returns></returns>
         public string GetSql()
         {
+            parameters = this.cmd.Params.ToArray();
+
             string[] _param = new string[parameters.Length];
             for (int i = 0; i < parameters.Length; i++)
             {

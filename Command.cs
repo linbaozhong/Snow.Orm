@@ -82,96 +82,6 @@ namespace Snow
         public object data { set; get; }
     }
 
-    public abstract class BaseEntity : DictionaryBase
-    {
-
-        private string _tablename = string.Empty;
-
-        /// <summary>
-        /// 主键名及其类型
-        /// </summary>
-        protected Dictionary<string, object> _primary = null;
-
-        /// <summary>
-        /// 数据表名
-        /// </summary>
-        public string TableName
-        {
-            protected set { _tablename = value; }
-            get { return _tablename; }
-        }
-        /// <summary>
-        /// 主键
-        /// </summary>
-        public Dictionary<string, object> PrimaryKey
-        {
-            protected set
-            {
-                _primary = value;
-            }
-            get
-            {
-                return _primary;
-            }
-        }
-
-        public object this[string key]
-        {
-            set { this.Dictionary[key] = value; }
-            get { return this.Dictionary[key]; }
-        }
-
-        public IDictionary GetEntity
-        {
-            get
-            {
-                return this.Dictionary;
-            }
-        }
-        protected void Set<T>(T value, [CallerMemberName]string name = null)
-        {
-            this.Dictionary[name] = value;
-            //属性改变事件
-            if (_OnPropertyChanged != null)
-            {
-                PropertyChangedEventArgs e = new PropertyChangedEventArgs(name);
-                _OnPropertyChanged(this, e);
-            }
-        }
-
-        protected T Get<T>([CallerMemberName]string name = null)
-        {
-            if (this.Dictionary.Contains(name))
-            {
-                return (T)this.Dictionary[name];
-            }
-            return default(T);
-        }
-
-        #region Event
-        /// <summary>
-        /// 属性改变事件处理句柄
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected delegate void PropertyChangedHandler(object sender, PropertyChangedEventArgs e);
-
-        /// <summary>
-        /// 属性委托处理句柄
-        /// </summary>
-        private PropertyChangedHandler _OnPropertyChanged = null;
-
-        /// <summary>
-        /// 对象属性改变时发生事件
-        /// </summary>
-        protected event PropertyChangedHandler OnPropertyChanged
-        {
-            add { _OnPropertyChanged += value; }
-            remove { _OnPropertyChanged -= value; }
-        }
-        #endregion
-    }
-
 
     /// <summary>
     /// Sql Command
@@ -192,7 +102,7 @@ namespace Snow
         /// <summary>
         /// 表名
         /// </summary>
-        public string Table { set; get; }
+        public string TableName { set; get; }
         /// <summary>
         /// 返回的记录数
         /// </summary>
@@ -264,53 +174,5 @@ namespace Snow
         public PropertyInfo[] properties { set; get; }
     }
 
-    class Table
-    {
-        /// <summary>
-        /// 表名
-        /// </summary>
-        public string Name { set; get; }
-        /// <summary>
-        /// 字段
-        /// </summary>
-        public Column[] Fields { set; get; }
-
-        public DataColumn[] Columns { set; get; }
-    }
-    /// <summary>
-    /// 表列
-    /// </summary>
-    class Column
-    {
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        /// <param name="name">列名</param>
-        /// <param name="type">类型</param>
-        /// <param name="value">初始值</param>
-        /// <param name="isDatabaseGenerated">是否数据库自动生成列</param>
-        public Column(string name, Type type, object value = null, bool isDatabaseGenerated = false)
-        {
-            Name = name;
-            Type = type;
-            IsDatabaseGenerated = isDatabaseGenerated;
-        }
-        /// <summary>
-        /// 列名
-        /// </summary>
-        public string Name { set; get; }
-        /// <summary>
-        /// 列类型
-        /// </summary>
-        public Type Type { set; get; }
-        /// <summary>
-        /// 初始值
-        /// </summary>
-        public object Value { set; get; }
-        /// <summary>
-        /// 是否数据库自动生成列
-        /// </summary>
-        public bool IsDatabaseGenerated { set; get; }
-    }
 
 }

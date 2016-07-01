@@ -16,136 +16,64 @@ namespace Snow
         /// <summary>
         /// 获取单个数据对象
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public Result Get<T>(T model)
-        {
-            prepare();
+        //public DataSet Get(BaseEntity model)
+        //{
+        //    prepare(model);
+        //    DataSet ds = null;
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
+        //            // 读取一条记录
+        //            cmd.Top = 1;
+        //            // 查询准备
+        //            this.query(model);
+        //            // 构造命令
+        //            this.createSql();
+        //        }
+        //        // 读取记录集
+        //        ds = this.getDataSet();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw e;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
+        //    return ds;
+        //}
 
+        /// <summary>
+        /// 获取数据对象列表
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public DataSet Find(BaseEntity model, int top = 0)
+        {
+            prepare(model);
+            DataSet ds = null;
             try
             {
                 if (!this.cmd.IsNative)
                 {
-                    // 读取一条记录
-                    cmd.Top = 1;
-                    // 查询准备
-                    this.query<T>(model);
-                    // 构造命令
-                    this.createSql();
-                }
-                //
-                this.getModel(model);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
-
-            return result;
-        }
-        public Result Get_(BaseEntity model)
-        {
-            prepare();
-
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
-                    // 读取一条记录
-                    cmd.Top = 1;
+                    if (top > 0)
+                    {
+                        // 读取一条记录
+                        cmd.Top = top;
+                    }
                     // 查询准备
                     this.query(model);
                     // 构造命令
                     this.createSql();
                 }
-                //
-                this.getModel(model);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// 获取数据对象列表
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public Result Find<T>(List<T> model) where T : class, new()
-        {
-            this.prepare();
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
-                    // 查询准备
-                    this.query<T>();
-                    // 构造命令
-                    this.createSql();
-                }
-                // 检查前面的准备是否有错误
-                if (result.status == 200)
-                {
-                    //
-                    DataSet ds = this.getDataSet();
-
-                    this.dataTable2List(model, ds.Tables[0]);
-                }
-
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
-
-
-            return result;
-        }
-        /// <summary>
-        /// 返回一个记录集
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public DataSet Find<T>()
-        {
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
-                    // 查询准备
-                    this.query<T>();
-                    // 构造命令
-                    this.createSql();
-                }
-
-                return this.getDataSet();
+                // 读取记录集
+                ds = this.getDataSet();
             }
             catch (Exception e)
             {
@@ -157,7 +85,39 @@ namespace Snow
                 this.trace(this.GetSql());
                 this.finish();
             }
+            return ds;
         }
+        /// <summary>
+        /// 返回一个记录集
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        //public DataSet Find<T>()
+        //{
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
+        //            // 查询准备
+        //            this.query<T>();
+        //            // 构造命令
+        //            this.createSql();
+        //        }
+
+        //        return this.getDataSet();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        throw e;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
+        //}
 
         /// <summary>
         /// 插入一条新的记录
@@ -165,492 +125,492 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns>以Dictionary类型返回自增字段ID，在result.data中</returns>
-        public Result Insert<T>(T model)
-        {
-            this.tables = new Table[1] { prepare(model) };
-            try
-            {
-                //// 获取对象的类型
-                //Type m_type = typeof(T);
-                //// 获取该对象的全部属性
-                //PropertyInfo[] properties = m_type.GetProperties();
+        //public Result Insert(BaseEntity model)
+        //{
+        //    prepare(model);
+        //    try
+        //    {
+        //        //// 获取对象的类型
+        //        //Type m_type = typeof(T);
+        //        //// 获取该对象的全部属性
+        //        //PropertyInfo[] properties = m_type.GetProperties();
 
-                if (!this.cmd.IsNative)
-                {
-                    // 插入
-                    cmd.Command = Command.Insert;
-                    //// 表名
-                    //this.getTableName(m_type);
+        //        if (!this.cmd.IsNative)
+        //        {
+        //            // 插入
+        //            cmd.Command = Command.Insert;
+        //            //// 表名
+        //            //this.getTableName(m_type);
 
-                    // 如果没有指定返回列，则返回传入参数对象的全部列
-                    if (cmd.Fields.Count == 0)
-                    {
-                        foreach (var field in tables[0].Fields)
-                        {
-                            // 忽略排除字段
-                            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
-                            {
-                                continue;
-                            }
-                            // 数据库自增字段
-                            if (field.IsDatabaseGenerated)
-                            {
-                                SqlParameter idParameter = new SqlParameter("@id", 0);
-                                idParameter.Direction = ParameterDirection.Output;
+        //            // 如果没有指定返回列，则返回传入参数对象的全部列
+        //            if (cmd.Fields.Count == 0)
+        //            {
+        //                foreach (var field in table.Entity)
+        //                {
+        //                    // 忽略排除字段
+        //                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Key))
+        //                    {
+        //                        continue;
+        //                    }
+        //                    // 数据库自增字段
+        //                    if (field.Value.IsDatabaseGenerated)
+        //                    {
+        //                        SqlParameter idParameter = new SqlParameter("@id", 0);
+        //                        idParameter.Direction = ParameterDirection.Output;
 
-                                cmd.Params.Add(idParameter);
-                            }
-                            else
-                            {
-                                cmd.Fields.Add(field.Name);
+        //                        cmd.Params.Add(idParameter);
+        //                    }
+        //                    else
+        //                    {
+        //                        cmd.Fields.Add(field.Key);
 
-                                cmd.Params.Add(new SqlParameter("@" + field.Name, field.Value));
-                            }
-                        }
+        //                        cmd.Params.Add(new SqlParameter("@" + field.Key, field.Value));
+        //                    }
+        //                }
 
-                        //for (int i = 0, len = properties.Length; i < len; i++)
-                        //{
-                        //    // 忽略排除字段
-                        //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
-                        //    {
-                        //        continue;
-                        //    }
-                        //    // 数据库自增字段
-                        //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
-                        //    {
-                        //        SqlParameter idParameter = new SqlParameter("@id", 0);
-                        //        idParameter.Direction = ParameterDirection.Output;
+        //                //for (int i = 0, len = properties.Length; i < len; i++)
+        //                //{
+        //                //    // 忽略排除字段
+        //                //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+        //                //    {
+        //                //        continue;
+        //                //    }
+        //                //    // 数据库自增字段
+        //                //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+        //                //    {
+        //                //        SqlParameter idParameter = new SqlParameter("@id", 0);
+        //                //        idParameter.Direction = ParameterDirection.Output;
 
-                        //        cmd.Params.Add(idParameter);
-                        //    }
-                        //    else
-                        //    {
-                        //        cmd.Fields.Add(properties[i].Name.ToLower());
+        //                //        cmd.Params.Add(idParameter);
+        //                //    }
+        //                //    else
+        //                //    {
+        //                //        cmd.Fields.Add(properties[i].Name.ToLower());
 
-                        //        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
-                        //    }
-                        //}
-                    }
-                    this.createSql();
-                }
+        //                //        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
+        //                //    }
+        //                //}
+        //            }
+        //            this.createSql();
+        //        }
 
-                parameters = this.cmd.Params.ToArray();
+        //        parameters = this.cmd.Params.ToArray();
 
-                // 返回数据库自增关键字段值
-                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
-                // 将自增字段值写入返回值字典
-                int len = tables[0].Fields.Length;
-                Dictionary<string, object> returnVal = new Dictionary<string, object>();
-                for (int i = 0; i < len; i++)
-                {
-                    if (tables[0].Fields[i].IsDatabaseGenerated)
-                    {
-                        returnVal.Add(tables[0].Fields[i].Name, cmd.Params[i].Value);
-                    }
-                }
-                result.data = returnVal;
-                //for (int i = 0, len = properties.Length; i < len; i++)
-                //{
-                //    // 数据库自增字段
-                //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
-                //    {
-                //        switch (properties[i].PropertyType.Name)
-                //        {
-                //            case "Int64":
-                //                properties[i].SetValue(model, Convert.ToInt64(cmd.Params[i].Value));
-                //                break;
-                //        }
-                //    }
-                //}
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
+        //        // 返回数据库自增关键字段值
+        //        DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //        // 将自增字段值写入返回值字典
+        //        int len = table[0].Fields.Length;
+        //        Dictionary<string, object> returnVal = new Dictionary<string, object>();
+        //        for (int i = 0; i < len; i++)
+        //        {
+        //            if (table[0].Fields[i].IsDatabaseGenerated)
+        //            {
+        //                returnVal.Add(table[0].Fields[i].Name, cmd.Params[i].Value);
+        //            }
+        //        }
+        //        result.data = returnVal;
+        //        //for (int i = 0, len = properties.Length; i < len; i++)
+        //        //{
+        //        //    // 数据库自增字段
+        //        //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+        //        //    {
+        //        //        switch (properties[i].PropertyType.Name)
+        //        //        {
+        //        //            case "Int64":
+        //        //                properties[i].SetValue(model, Convert.ToInt64(cmd.Params[i].Value));
+        //        //                break;
+        //        //        }
+        //        //    }
+        //        //}
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        public Result Insert<T>(List<T> model)
-        {
-            this.tables = prepare(model);
+        //public Result Insert<T>(List<BaseEntity> model)
+        //{
+        //    prepare(model);
 
-            try
-            {
-                if (this.cmd.IsNative)
-                {
-                    this.createSql();
+        //    try
+        //    {
+        //        if (this.cmd.IsNative)
+        //        {
+        //            this.createSql();
 
-                    parameters = this.cmd.Params.ToArray();
+        //            parameters = this.cmd.Params.ToArray();
 
-                    DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
-                }
-                else
-                {
-                    // 命令列表
-                    List<CommandInfo> l_command = new List<CommandInfo>();
-                    // 插入
-                    cmd.Command = Command.Insert;
-                    // 获取对象的类型
-                    Type m_type = typeof(T);
-                    //// 表名
-                    //this.getTableName(m_type);
+        //            DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //        }
+        //        else
+        //        {
+        //            // 命令列表
+        //            List<CommandInfo> l_command = new List<CommandInfo>();
+        //            // 插入
+        //            cmd.Command = Command.Insert;
+        //            // 获取对象的类型
+        //            Type m_type = typeof(T);
+        //            //// 表名
+        //            //this.getTableName(m_type);
 
-                    //// 获取该对象的全部属性
-                    //PropertyInfo[] properties = m_type.GetProperties();
+        //            //// 获取该对象的全部属性
+        //            //PropertyInfo[] properties = m_type.GetProperties();
 
-                    // 如果没有指定返回列，则返回传入参数对象的全部列
-                    if (cmd.Fields.Count == 0)
-                    {
-                        foreach (var table in this.tables)
-                        {
-                            //for (int i = 0, len = properties.Length; i < len; i++)
-                            //{
-                            //    // 忽略排除字段
-                            //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
-                            //    {
-                            //        continue;
-                            //    }
+        //            // 如果没有指定返回列，则返回传入参数对象的全部列
+        //            if (cmd.Fields.Count == 0)
+        //            {
+        //                foreach (var table in this.table)
+        //                {
+        //                    //for (int i = 0, len = properties.Length; i < len; i++)
+        //                    //{
+        //                    //    // 忽略排除字段
+        //                    //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+        //                    //    {
+        //                    //        continue;
+        //                    //    }
 
-                            //    // 忽略数据库自增字段
-                            //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
-                            //    {
-                            //        SqlParameter idParameter = new SqlParameter("@id", 0);
-                            //        idParameter.Direction = ParameterDirection.Output;
+        //                    //    // 忽略数据库自增字段
+        //                    //    if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+        //                    //    {
+        //                    //        SqlParameter idParameter = new SqlParameter("@id", 0);
+        //                    //        idParameter.Direction = ParameterDirection.Output;
 
-                            //        cmd.Params.Add(idParameter);
-                            //    }
-                            //    else
-                            //    {
-                            //        cmd.Fields.Add(properties[i].Name.ToLower());
+        //                    //        cmd.Params.Add(idParameter);
+        //                    //    }
+        //                    //    else
+        //                    //    {
+        //                    //        cmd.Fields.Add(properties[i].Name.ToLower());
 
-                            //        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(item)));
-                            //    }
-                            //}
+        //                    //        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(item)));
+        //                    //    }
+        //                    //}
 
-                            foreach (var field in table.Fields)
-                            {
-                                // 忽略排除字段
-                                if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
-                                {
-                                    continue;
-                                }
-                                // 数据库自增字段
-                                if (field.IsDatabaseGenerated)
-                                {
-                                    SqlParameter idParameter = new SqlParameter("@id", 0);
-                                    idParameter.Direction = ParameterDirection.Output;
+        //                    foreach (var field in table.Fields)
+        //                    {
+        //                        // 忽略排除字段
+        //                        if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
+        //                        {
+        //                            continue;
+        //                        }
+        //                        // 数据库自增字段
+        //                        if (field.IsDatabaseGenerated)
+        //                        {
+        //                            SqlParameter idParameter = new SqlParameter("@id", 0);
+        //                            idParameter.Direction = ParameterDirection.Output;
 
-                                    cmd.Params.Add(idParameter);
-                                }
-                                else
-                                {
-                                    cmd.Fields.Add(field.Name);
+        //                            cmd.Params.Add(idParameter);
+        //                        }
+        //                        else
+        //                        {
+        //                            cmd.Fields.Add(field.Name);
 
-                                    cmd.Params.Add(new SqlParameter("@" + field.Name, field.Value));
-                                }
-                            }
+        //                            cmd.Params.Add(new SqlParameter("@" + field.Name, field.Value));
+        //                        }
+        //                    }
 
-                            this.createSql();
+        //                    this.createSql();
 
-                            parameters = this.cmd.Params.ToArray();
+        //                    parameters = this.cmd.Params.ToArray();
 
-                            l_command.Add(new CommandInfo(string.Join(" ", this.cmd.SqlString), this.parameters));
+        //                    l_command.Add(new CommandInfo(string.Join(" ", this.cmd.SqlString), this.parameters));
 
-                            // 调试
-                            this.trace(this.GetSql());
+        //                    // 调试
+        //                    this.trace(this.GetSql());
 
-                            cmd.Fields.Clear();
-                            cmd.Params.Clear();
-                        }
-                    }
-                    DbHelperSQL.ExecuteSqlTran(l_command);
+        //                    cmd.Fields.Clear();
+        //                    cmd.Params.Clear();
+        //                }
+        //            }
+        //            DbHelperSQL.ExecuteSqlTran(l_command);
 
 
-                    //// 将自增字段值写入model
-                    //for (int t = 0; t < model.Count; t++)
-                    //{
-                    //    for (int i = 0, len = properties.Length; i < len; i++)
-                    //    {
-                    //        // 数据库自增字段
-                    //        if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
-                    //        {
-                    //            switch (properties[i].PropertyType.Name)
-                    //            {
-                    //                case "Int64":
-                    //                    properties[i].SetValue(model[t], Convert.ToInt64(l_command[t].Parameters[i].Value));
-                    //                    break;
-                    //            }
-                    //        }
-                    //    }
-                    //}
+        //            //// 将自增字段值写入model
+        //            //for (int t = 0; t < model.Count; t++)
+        //            //{
+        //            //    for (int i = 0, len = properties.Length; i < len; i++)
+        //            //    {
+        //            //        // 数据库自增字段
+        //            //        if (properties[i].IsDefined(typeof(DatabaseGeneratedAttribute), false))
+        //            //        {
+        //            //            switch (properties[i].PropertyType.Name)
+        //            //            {
+        //            //                case "Int64":
+        //            //                    properties[i].SetValue(model[t], Convert.ToInt64(l_command[t].Parameters[i].Value));
+        //            //                    break;
+        //            //            }
+        //            //        }
+        //            //    }
+        //            //}
 
-                    List<Dictionary<string, object>> returnVals = new List<Dictionary<string, object>>();
-                    for (int t = 0; t < this.tables.Length; t++)
-                    {
-                        // 将自增字段值写入返回值字典
-                        int len = tables[t].Fields.Length;
-                        Dictionary<string, object> returnVal = new Dictionary<string, object>();
-                        for (int i = 0; i < len; i++)
-                        {
-                            if (tables[0].Fields[i].IsDatabaseGenerated)
-                            {
-                                returnVal.Add(tables[0].Fields[i].Name, cmd.Params[i].Value);
-                            }
-                        }
+        //            List<Dictionary<string, object>> returnVals = new List<Dictionary<string, object>>();
+        //            for (int t = 0; t < this.table.Length; t++)
+        //            {
+        //                // 将自增字段值写入返回值字典
+        //                int len = table[t].Fields.Length;
+        //                Dictionary<string, object> returnVal = new Dictionary<string, object>();
+        //                for (int i = 0; i < len; i++)
+        //                {
+        //                    if (table[0].Fields[i].IsDatabaseGenerated)
+        //                    {
+        //                        returnVal.Add(table[0].Fields[i].Name, cmd.Params[i].Value);
+        //                    }
+        //                }
 
-                        returnVals.Add(returnVal);
-                    }
-                    result.data = returnVals;
+        //                returnVals.Add(returnVal);
+        //            }
+        //            result.data = returnVals;
 
-                }
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                this.finish();
-            }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //    }
+        //    finally
+        //    {
+        //        this.finish();
+        //    }
 
-            return result;
-        }
-        /// <summary>
-        /// 更新一条记录
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public Result Update<T>(T model)
-        {
-            this.prepare();
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
+        //    return result;
+        //}
+        ///// <summary>
+        ///// 更新一条记录
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="model"></param>
+        ///// <returns></returns>
+        //public Result Update<T>(T model)
+        //{
+        //    this.prepare();
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
 
-                    // 更新
-                    cmd.Command = Command.Update;
-                    // 获取对象的类型
-                    Type m_type = typeof(T);
-                    // 表名
-                    this.getTableName(m_type);
+        //            // 更新
+        //            cmd.Command = Command.Update;
+        //            // 获取对象的类型
+        //            Type m_type = typeof(T);
+        //            // 表名
+        //            this.getTableName(m_type);
 
-                    // 获取该对象的全部属性
-                    PropertyInfo[] properties = m_type.GetProperties();
+        //            // 获取该对象的全部属性
+        //            PropertyInfo[] properties = m_type.GetProperties();
 
-                    // 如果没有指定更新列，则更新传入参数对象的全部列
-                    if (cmd.Fields.Count == 0)
-                    {
-                        for (int i = 0, len = properties.Length; i < len; i++)
-                        {
-                            // 忽略排除字段
-                            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
-                            {
-                                continue;
-                            }
+        //            // 如果没有指定更新列，则更新传入参数对象的全部列
+        //            if (cmd.Fields.Count == 0)
+        //            {
+        //                for (int i = 0, len = properties.Length; i < len; i++)
+        //                {
+        //                    // 忽略排除字段
+        //                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+        //                    {
+        //                        continue;
+        //                    }
 
-                            cmd.Fields.Add(properties[i].Name.ToLower());
+        //                    cmd.Fields.Add(properties[i].Name.ToLower());
 
-                            cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0, len = properties.Length; i < len; i++)
-                        {
-                            if (cmd.Fields.Contains(properties[i].Name.ToLower()))
-                            {
-                                cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
-                            }
-                        }
-                    }
-                    this.createSql();
-                }
+        //                    cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
+        //                }
+        //            }
+        //            else
+        //            {
+        //                for (int i = 0, len = properties.Length; i < len; i++)
+        //                {
+        //                    if (cmd.Fields.Contains(properties[i].Name.ToLower()))
+        //                    {
+        //                        cmd.Params.Add(new SqlParameter("@" + properties[i].Name.ToLower(), properties[i].GetValue(model)));
+        //                    }
+        //                }
+        //            }
+        //            this.createSql();
+        //        }
 
-                parameters = this.cmd.Params.ToArray();
+        //        parameters = this.cmd.Params.ToArray();
 
-                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
+        //        DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
 
-            return result;
+        //    return result;
 
-        }
-        /// <summary>
-        /// 删除一条记录
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public Result Delete<T>()
-        {
-            this.prepare();
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
+        //}
+        ///// <summary>
+        ///// 删除一条记录
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="model"></param>
+        ///// <returns></returns>
+        //public Result Delete<T>()
+        //{
+        //    this.prepare();
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
 
-                    // 删除
-                    cmd.Command = Command.Delete;
-                    // 获取对象的类型
-                    Type m_type = typeof(T);
-                    //Type m_type = model.GetType();
-                    // 表名
-                    this.getTableName(m_type);
+        //            // 删除
+        //            cmd.Command = Command.Delete;
+        //            // 获取对象的类型
+        //            Type m_type = typeof(T);
+        //            //Type m_type = model.GetType();
+        //            // 表名
+        //            this.getTableName(m_type);
 
-                    this.createSql();
-                }
+        //            this.createSql();
+        //        }
 
-                parameters = this.cmd.Params.ToArray();
+        //        parameters = this.cmd.Params.ToArray();
 
-                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
+        //        DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
 
-            return result;
-        }
-        /// <summary>
-        /// 是否存在符合条件的记录
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public bool Exists<T>()
-        {
-            this.prepare();
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
-                    // 查询准备
-                    this.query<T>();
-                    // 构造命令
-                    this.createSql();
-                }
+        //    return result;
+        //}
+        ///// <summary>
+        ///// 是否存在符合条件的记录
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="model"></param>
+        ///// <returns></returns>
+        //public bool Exists<T>()
+        //{
+        //    this.prepare();
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
+        //            // 查询准备
+        //            this.query<T>();
+        //            // 构造命令
+        //            this.createSql();
+        //        }
 
-                parameters = this.cmd.Params.ToArray();
+        //        parameters = this.cmd.Params.ToArray();
 
-                return DbHelperSQL.Exists(string.Join(" ", this.cmd.SqlString), this.parameters);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-                return false;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
+        //        return DbHelperSQL.Exists(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //        return false;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
 
-                this.finish();
-            }
-        }
-        /// <summary>
-        /// 统计符合条件的记录数
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public Int64 Count<T>()
-        {
-            this.prepare();
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
-                    this.cmd.Fields.Add("count(1)");
-                    // 查询准备
-                    this.query<T>();
-                    // 构造命令
-                    this.createSql();
-                }
+        //        this.finish();
+        //    }
+        //}
+        ///// <summary>
+        ///// 统计符合条件的记录数
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="model"></param>
+        ///// <returns></returns>
+        //public Int64 Count<T>()
+        //{
+        //    this.prepare();
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
+        //            this.cmd.Fields.Add("count(1)");
+        //            // 查询准备
+        //            this.query<T>();
+        //            // 构造命令
+        //            this.createSql();
+        //        }
 
-                parameters = this.cmd.Params.ToArray();
+        //        parameters = this.cmd.Params.ToArray();
 
-                object n = DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //        object n = DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
 
-                return Convert.ToInt64(n);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-                return 0;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
-        }
-        /// <summary>
-        /// 执行查询，返回首行首列结果
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public object Single<T>()
-        {
-            this.prepare();
-            try
-            {
-                if (!this.cmd.IsNative)
-                {
-                    // 查询准备
-                    this.query<T>();
-                    // 构造命令
-                    this.createSql();
-                }
+        //        return Convert.ToInt64(n);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //        return 0;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
+        //}
+        ///// <summary>
+        ///// 执行查询，返回首行首列结果
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="model"></param>
+        ///// <returns></returns>
+        //public object Single<T>()
+        //{
+        //    this.prepare();
+        //    try
+        //    {
+        //        if (!this.cmd.IsNative)
+        //        {
+        //            // 查询准备
+        //            this.query<T>();
+        //            // 构造命令
+        //            this.createSql();
+        //        }
 
-                parameters = this.cmd.Params.ToArray();
+        //        parameters = this.cmd.Params.ToArray();
 
-                return DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
-            }
-            catch (Exception e)
-            {
-                result.status = -1;
-                result.data = e;
-                return null;
-            }
-            finally
-            {
-                // 调试
-                this.trace(this.GetSql());
-                this.finish();
-            }
-        }
+        //        return DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        result.status = -1;
+        //        result.data = e;
+        //        return null;
+        //    }
+        //    finally
+        //    {
+        //        // 调试
+        //        this.trace(this.GetSql());
+        //        this.finish();
+        //    }
+        //}
         /// <summary>
         /// 执行原生查询，返回受影响的行数
         /// </summary>
@@ -795,10 +755,10 @@ namespace Snow
         /// <summary>
         /// 预处理
         /// </summary>
-        private Table prepare(BaseEntity model)
+        private void prepare(BaseEntity model)
         {
             prepare();
-            return getTable(model);
+            this.table = getTable(model);
         }
         private Table[] prepare(List<BaseEntity> model)
         {
@@ -826,6 +786,11 @@ namespace Snow
 
             return _obj as Table[];
         }
+        /// <summary>
+        /// 获取实体映射表
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         private Table getTable(BaseEntity model)
         {
             string _guid = model.GetType().GUID.ToString();
@@ -835,24 +800,47 @@ namespace Snow
 
             if (_obj == null)
             {
-                getFields(model);
-
-                _obj = model;
+                _obj = getRuntimeEntity(model);
 
                 DataCache.SetCache(_guid, _obj);
             }
             return _obj as Table;
         }
+        /// <summary>
+        /// 获取运行时实体
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        Table getRuntimeEntity(BaseEntity model)
+        {
+            Table _table = new Snow.Table();
+
+            _table.Name = model.TableName;
+
+            string _key = "";
+
+            foreach (DictionaryEntry field in model)
+            {
+                _key = field.Key.ToString().ToLower();
+
+                _table[_key] = new Column(
+                    _key,
+                    model[_key].GetType()
+                    );
+            }
+            return _table;
+        }
+
         private void prepare()
         {
-            result = new Result();
+            //result = new Result();
         }
         /// <summary>
         /// 结束处理
         /// </summary>
         private void finish()
         {
-            this.cmd = new Sql();
+            //this.cmd = new Sql();
         }
         /// <summary>
         /// 读取映射的表名
@@ -861,106 +849,74 @@ namespace Snow
         /// <returns></returns>
         string getTableName(Type type)
         {
-            if (string.IsNullOrWhiteSpace(cmd.Table))
+            if (string.IsNullOrWhiteSpace(cmd.TableName))
             {
                 TableAttribute t_attr = type.GetCustomAttribute(typeof(TableAttribute), false) as TableAttribute;
                 if (t_attr == null)
                 {
-                    cmd.Table = getName(type.Name);
+                    cmd.TableName = getName(type.Name);
                 }
                 else
                 {
-                    cmd.Table = getName(t_attr.Name);
+                    cmd.TableName = getName(t_attr.Name);
                 }
             }
 
-            return cmd.Table;
+            return cmd.TableName;
         }
         /// <summary>
         /// 读取全部映射字段
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        void getFields(BaseEntity model)
-        {
-            // 获取该对象的全部属性
-            PropertyInfo[] properties = model.GetType().GetProperties();
-
-            //int len = properties.Length;
-            //Column[] _fields = new Column[len];
-            IDictionary dict = model.GetEntity;
-
-            foreach (PropertyInfo _property in properties)
-            {
-                if (dict.Contains( _property.Name.ToLower()))
-                {
-                    continue;
-                }
-
-                dict[_property.Name.ToLower()] = _property.GetValue(model);
-
-                //// 数据库自增字段
-                //_fields[i] = new Column(
-                //    _property.Name.ToLower(),
-                //    _property.PropertyType,
-                //    _property.GetValue(model),
-                //    _property.IsDefined(typeof(DatabaseGeneratedAttribute), false));
-            }
-        }
         private string getName(string str)
         {
             return "[" + str + "]";
         }
-        private void query<T>(T model = default(T))
-        {
-            cmd.Command = Command.Select;
+        //private void query<T>(T model = default(T))
+        //{
+        //    cmd.Command = Command.Select;
 
-            // 获取对象的类型
-            Type m_type = typeof(T);
-            //// 表名
-            //this.getTableName(m_type);
+        //    // 获取对象的类型
+        //    Type m_type = typeof(T);
+        //    //// 表名
+        //    //this.getTableName(m_type);
 
-            // 如果没有指定返回列，则返回传入参数对象的全部列
-            if (cmd.Fields.Count == 0)
-            {
-                foreach (var field in tables[0].Fields)
-                {
-                    // 忽略排除字段
-                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
-                    {
-                        continue;
-                    }
-                    cmd.Fields.Add(getName(field.Name));
+        //    // 如果没有指定返回列，则返回传入参数对象的全部列
+        //    if (cmd.Fields.Count == 0)
+        //    {
+        //        foreach (var field in table[0].Fields)
+        //        {
+        //            // 忽略排除字段
+        //            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
+        //            {
+        //                continue;
+        //            }
+        //            cmd.Fields.Add(getName(field.Name));
 
-                }
-                //// 获取该对象的全部属性
-                //PropertyInfo[] properties = m_type.GetProperties();
+        //        }
+        //        //// 获取该对象的全部属性
+        //        //PropertyInfo[] properties = m_type.GetProperties();
 
-                //for (int i = 0, len = properties.Length; i < len; i++)
-                //{
+        //        //for (int i = 0, len = properties.Length; i < len; i++)
+        //        //{
 
-                //    // 忽略排除字段
-                //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
-                //    {
-                //        continue;
-                //    }
-                //    cmd.Fields.Add(getName(properties[i].Name.ToLower()));
-                //    //
-                //    //properties[i].GetValue(model);
-                //}
-            }
-        }
+        //        //    // 忽略排除字段
+        //        //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
+        //        //    {
+        //        //        continue;
+        //        //    }
+        //        //    cmd.Fields.Add(getName(properties[i].Name.ToLower()));
+        //        //    //
+        //        //    //properties[i].GetValue(model);
+        //        //}
+        //    }
+        //}
 
         private void query(BaseEntity model)
         {
             cmd.Command = Command.Select;
 
-            this.trace(model.TableName);
-
-            foreach (DictionaryEntry item in model)
-            {
-                this.trace(string.Format("name:{0} , value:{1}", item.Key, item.Value));
-            }
             // 如果没有指定返回列，则返回传入参数对象的全部列
             if (cmd.Fields.Count == 0)
             {
@@ -1019,7 +975,7 @@ namespace Snow
                 // 符合条件的记录总数
                 try
                 {
-                    string _countSql = string.Format("{0} count(1) from {1} where {2}", cmd.Command, cmd.Table, string.Join(" ", cmd.Where.ToArray()));
+                    string _countSql = string.Format("{0} count(1) from {1} where {2}", cmd.Command, cmd.TableName, string.Join(" ", cmd.Where.ToArray()));
                     // 调试
                     this.trace(_countSql);
 
@@ -1069,7 +1025,7 @@ namespace Snow
                 {
                     cmd.SqlString.Add(string.Format(" order by T.{0}", string.Join(",T.", cmd.OrderBy.ToArray())));
                 }
-                cmd.SqlString.Add(string.Format(")as Row,T.* from {0} T", cmd.Table));
+                cmd.SqlString.Add(string.Format(")as Row,T.* from {0} T", cmd.TableName));
 
                 // Where
                 if (cmd.Where.Count > 0)
@@ -1097,7 +1053,7 @@ namespace Snow
                     cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
                 }
                 // From
-                cmd.SqlString.Add(string.Format(" from {0}", cmd.Table));
+                cmd.SqlString.Add(string.Format(" from {0}", cmd.TableName));
 
                 // Join
                 if (cmd.Join.Count > 0)
@@ -1149,7 +1105,7 @@ namespace Snow
             // 命令
             cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
-            cmd.SqlString.Add(cmd.Table);
+            cmd.SqlString.Add(cmd.TableName);
             // Fields
             if (cmd.Fields.Count > 0)
             {
@@ -1186,7 +1142,7 @@ namespace Snow
             // 命令
             cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
-            cmd.SqlString.Add(cmd.Table);
+            cmd.SqlString.Add(cmd.TableName);
             cmd.SqlString.Add("set");
 
             // Fields
@@ -1226,7 +1182,7 @@ namespace Snow
             cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
             // From
-            cmd.SqlString.Add(cmd.Table);
+            cmd.SqlString.Add(cmd.TableName);
             // Where
             if (this.cmd.IsKey)
             {
@@ -1248,17 +1204,17 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="dt"></param>
-        private void dataTable2List<T>(List<T> model, DataTable dt) where T : class, new()
-        {
-            foreach (DataRow row in dt.Rows)
-            {
-                T m_t = new T();
+        //private void dataTable2List<T>(List<T> model, DataTable dt) where T : class, new()
+        //{
+        //    foreach (DataRow row in dt.Rows)
+        //    {
+        //        T m_t = new T();
 
-                this.dataRow2Model(m_t, row);
+        //        this.dataRow2Model(m_t, row);
 
-                model.Add(m_t);
-            }
-        }
+        //        model.Add(m_t);
+        //    }
+        //}
         /// <summary>
         /// datarow转model
         /// </summary>
@@ -1271,20 +1227,20 @@ namespace Snow
             try
             {
                 // 对象属性名
-                string _propertyName;
+                string _columnName;
+
                 // 遍历对象属性，并按需赋值
-                foreach (DictionaryEntry p in model)
+                foreach (DictionaryEntry p in this.table)
                 {
-                    _propertyName = p.Key.ToString().ToLower();
+                    _columnName = p.Key.ToString();
 
-                    if (!cmd.Fields.Contains(_propertyName) || Convert.IsDBNull(row[_propertyName]) || row[_propertyName].ToString() == "")
+                    if (!cmd.Fields.Contains(getName(_columnName)) || Convert.IsDBNull(row[_columnName]) || row[_columnName].ToString() == "")
                     {
                         continue;
                     }
                     else
                     {
-                        //p.SetValue(model, Convert.ChangeType(row[_propertyName], p.PropertyType), null);
-                        p[_propertyName] = Convert.ChangeType(row[_propertyName], p.PropertyType);
+                        model[_columnName] = row[_columnName];
                     }
                 }
             }
@@ -1292,36 +1248,8 @@ namespace Snow
             {
                 throw e;
             }
-
-            // 动态编译
-
         }
 
-        private Dictionary<string, object> dataRow2Model(DataRow row)
-        {
-            Dictionary<string, object> model = new Dictionary<string, object>();
-
-            try
-            {
-                foreach (var field in tables[0].Fields)
-                {
-                    if (!cmd.Fields.Contains(field.Name) || Convert.IsDBNull(row[field.Name]) || row[field.Name].ToString() == "")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        model.Add(field.Name, row[field.Name]);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-
-            return model;
-        }
         #endregion
     }
 
