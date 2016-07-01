@@ -17,10 +17,10 @@ namespace Snow
             finish();
         }
 
-        public List<BaseEntity> List(BaseEntity model)
+        public List<T> List<T>(T model) where T : class, new()
         {
-            prepare(model);
-            List<BaseEntity> _list = _List(_Rows(model), model);
+            prepare(model as BaseEntity);
+            List<T> _list = _List<T>(_Rows(model as BaseEntity));
             finish();
 
             return _list;
@@ -32,15 +32,15 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="dt"></param>
-        private List<BaseEntity> _List(DataRow[] rows, BaseEntity model)
+        private List<T> _List<T>(DataRow[] rows) where T : class, new()
         {
-            List<BaseEntity> _list = new List<BaseEntity>();
-
-            
+            List<T> _list = new List<T>();
 
             foreach (DataRow row in rows)
             {
-                _Model(row, model);
+                var model = new T();
+
+                _Model(row, model as BaseEntity);
 
                 _list.Add(model);
             }

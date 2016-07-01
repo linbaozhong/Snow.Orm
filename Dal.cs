@@ -1198,7 +1198,23 @@ namespace Snow
             //
             //this._sqlStr = string.Join(" ", _cmd);
         }
+        /// <summary>
+        /// table转list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="model"></param>
+        /// <param name="dt"></param>
+        //private void dataTable2List<T>(List<T> model, DataTable dt) where T : class, new()
+        //{
+        //    foreach (DataRow row in dt.Rows)
+        //    {
+        //        T m_t = new T();
 
+        //        this.dataRow2Model(m_t, row);
+
+        //        model.Add(m_t);
+        //    }
+        //}
         /// <summary>
         /// datarow转model
         /// </summary>

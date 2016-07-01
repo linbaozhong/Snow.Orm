@@ -107,6 +107,7 @@ namespace Snow
         }
         #endregion
     }
+
     /// <summary>
     /// 主键
     /// </summary>
@@ -130,5 +131,10 @@ namespace Snow
             Key = key;
             Type = type;
         }
+    }
+
+    public class CloneEntity : BaseEntity
+    {
+
     }
 }
