@@ -10,14 +10,14 @@ namespace Snow
 {
     public partial class Orm : NativeDb
     {
-        public void Model(BaseEntity model)
+        public void GetModel(BaseEntity model)
         {
             prepare(model);
             _Model(_Row(model), model);
             finish();
         }
 
-        public List<T> List<T>(T model) where T : class, new()
+        public List<T> GetList<T>(T model) where T : class, new()
         {
             prepare(model as BaseEntity);
             List<T> _list = _List<T>(_Rows(model as BaseEntity));
@@ -53,18 +53,24 @@ namespace Snow
             try
             {
                 string _key;
-                foreach (DictionaryEntry field in table)
-                {
-                    _key = field.Key.ToString().ToLower();
+                //foreach (DictionaryEntry field in table)
+                //{
+                //    _key = field.Key.ToString().ToLower();
 
-                    if (!cmd.Fields.Contains(getName(_key)) || Convert.IsDBNull(row[_key]) || row[_key].ToString() == "")
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        model[_key] = row[_key];
-                    }
+                //    if (!cmd.Fields.Contains(getName(_key)) || Convert.IsDBNull(row[_key]) || row[_key].ToString() == "")
+                //    {
+                //        continue;
+                //    }
+                //    else
+                //    {
+                //        model[_key] = row[_key];
+                //    }
+                //}
+
+                foreach (DataColumn col in row.Table.Columns)
+                {
+                    _key = col.ColumnName;
+                    model[_key] = row[_key];
                 }
             }
             catch (Exception e)

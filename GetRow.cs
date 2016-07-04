@@ -14,7 +14,7 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public DataRow Row(BaseEntity model)
+        public DataRow GetRow(BaseEntity model)
         {
             prepare(model);
             DataRow row = _Row(model);
@@ -27,7 +27,7 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public DataRow[] Rows(BaseEntity model)
+        public DataRow[] GetRows(BaseEntity model)
         {
             prepare(model);
             DataRow[] rows = _Rows(model);
@@ -43,7 +43,7 @@ namespace Snow
         /// <returns></returns>
         private DataRow _Row(BaseEntity model)
         {
-            DataSet ds = this.Find(model, 1);
+            DataSet ds = this._Find(model, 1);
 
             if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
             {
@@ -58,7 +58,7 @@ namespace Snow
         /// <returns></returns>
         private DataRow[] _Rows(BaseEntity model)
         {
-            DataSet ds = this.Find(model);
+            DataSet ds = this._Find(model);
 
             if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
             {

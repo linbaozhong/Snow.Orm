@@ -8,10 +8,10 @@ namespace Snow
     {
         #region 属性
 
-        /// <summary>
-        /// 操作实体
-        /// </summary>
-        Table table = new Snow.Table();
+        ///// <summary>
+        ///// 操作实体
+        ///// </summary>
+        //Table table = new Snow.Table();
 
         Sql cmd;
         /// <summary>
@@ -331,12 +331,11 @@ namespace Snow
         /// <summary>
         /// 强调要查询的表名
         /// </summary>
-        /// <param name="table">表名</param>
+        /// <param name="name">表名</param>
         /// <returns></returns>
-        public Orm Table(string table)
+        public Orm Table(string name)
         {
-            cmd.TableName = getName(table);
-            this.table.Name = table;
+            cmd.TableName = name;
             return this;
         }
 

@@ -52,6 +52,7 @@
     <Compile Include="DBUtility\CommandInfo.cs" />
     <Compile Include="DBUtility\DbHelperSQL.cs" />
     <Compile Include="DBUtility\PubConstant.cs" />
+    <Compile Include="GetDataSet.cs" />
     <Compile Include="GetRow.cs" />
     <Compile Include="GetEntity.cs" />
     <Compile Include="NativeDb.cs" />

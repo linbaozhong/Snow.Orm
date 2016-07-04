@@ -560,7 +560,7 @@ namespace Snow.DBUtility
                     {
                         PrepareCommand(cmd, connection, null, SQLString, cmdParms);
                         int rows = cmd.ExecuteNonQuery();
-                        cmd.Parameters.Clear();
+                        //cmd.Parameters.Clear();
                         return rows;
                     }
                     catch (System.Data.SqlClient.SqlException e)

@@ -133,8 +133,4 @@ namespace Snow
         }
     }
 
-    public class CloneEntity : BaseEntity
-    {
-
-    }
 }
