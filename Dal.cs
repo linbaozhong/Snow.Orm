@@ -606,11 +606,16 @@ namespace Snow
             // 读取表名
             getTableName(model);
             // 主键查询
-            if (model.PrimaryKey.Key != null && model[model.PrimaryKey.Key] != null 
-                && model[model.PrimaryKey.Key].ToString() != "" && model[model.PrimaryKey.Key].ToString() != "0")
+            if (cmd.IsKey 
+                || model.PrimaryKey.Key == null 
+                || model[model.PrimaryKey.Key] == null
+                || model[model.PrimaryKey.Key].ToString() == "" 
+                || model[model.PrimaryKey.Key].ToString() == "0")
             {
-                Id(model.PrimaryKey.Key, model[model.PrimaryKey.Key]);
+                return;
             }
+
+            Id(model.PrimaryKey.Key, model[model.PrimaryKey.Key]);
         }
 
         private void getTableName(BaseEntity model)
@@ -621,76 +626,76 @@ namespace Snow
             }
         }
 
-        private Table[] prepare(List<BaseEntity> model)
-        {
-            prepare();
+        //private Table[] prepare(List<BaseEntity> model)
+        //{
+        //    prepare();
 
-            string _guid = model.GetType().GUID.ToString();
+        //    string _guid = model.GetType().GUID.ToString();
 
-            // 读取cache
-            object _obj = DataCache.Get(_guid);
+        //    // 读取cache
+        //    object _obj = DataCache.Get(_guid);
 
-            if (_obj == null)
-            {
-                int len = model.Count;
-                Table[] _tables = new Table[len];
+        //    if (_obj == null)
+        //    {
+        //        int len = model.Count;
+        //        Table[] _tables = new Table[len];
 
-                for (int i = 0; i < len; i++)
-                {
-                    _tables[i] = getTable(model[i]);
-                }
+        //        for (int i = 0; i < len; i++)
+        //        {
+        //            _tables[i] = getTable(model[i]);
+        //        }
 
-                _obj = _tables;
+        //        _obj = _tables;
 
-                DataCache.Set(_guid, _obj);
-            }
+        //        DataCache.Set(_guid, _obj);
+        //    }
 
-            return _obj as Table[];
-        }
+        //    return _obj as Table[];
+        //}
         /// <summary>
         /// 获取实体映射表
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private Table getTable(BaseEntity model)
-        {
-            string _guid = model.GetType().GUID.ToString();
+        //private Table getTable(BaseEntity model)
+        //{
+        //    string _guid = model.GetType().GUID.ToString();
 
-            // 读取cache
-            object _obj = DataCache.Get(_guid);
+        //    // 读取cache
+        //    object _obj = DataCache.Get(_guid);
 
-            if (_obj == null)
-            {
-                _obj = getRuntimeEntity(model);
+        //    if (_obj == null)
+        //    {
+        //        _obj = getRuntimeEntity(model);
 
-                DataCache.Set(_guid, _obj);
-            }
-            return _obj as Table;
-        }
+        //        DataCache.Set(_guid, _obj);
+        //    }
+        //    return _obj as Table;
+        //}
         /// <summary>
         /// 获取运行时实体
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        Table getRuntimeEntity(BaseEntity model)
-        {
-            Table _table = new Snow.Table();
+        //Table getRuntimeEntity(BaseEntity model)
+        //{
+        //    Table _table = new Snow.Table();
 
-            _table.Name = model.TableName;
+        //    _table.Name = model.TableName;
 
-            string _key = "";
+        //    string _key = "";
 
-            foreach (DictionaryEntry field in model)
-            {
-                _key = field.Key.ToString().ToLower();
+        //    foreach (DictionaryEntry field in model)
+        //    {
+        //        _key = field.Key.ToString().ToLower();
 
-                _table[_key] = new Column(
-                    _key,
-                    field.GetType()
-                    );
-            }
-            return _table;
-        }
+        //        _table[_key] = new Column(
+        //            _key,
+        //            field.GetType()
+        //            );
+        //    }
+        //    return _table;
+        //}
         ///// <summary>
         ///// 读取映射的表名
         ///// </summary>

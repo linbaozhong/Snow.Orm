@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,7 +13,14 @@ namespace Snow
 
     public abstract class BaseEntity : DictionaryBase
     {
+        public BaseEntity()
+        {
+            DB = new Orm(this);
+        }
 
+        #region 属性
+
+        public Orm DB;
         /// <summary>
         /// 数据表名
         /// </summary>
@@ -31,6 +39,11 @@ namespace Snow
             get;
         }
 
+        public Table Table
+        {
+            protected set;
+            get;
+        }
         /// <summary>
         /// 数据字典
         /// </summary>
@@ -42,16 +55,44 @@ namespace Snow
             get { return this.Dictionary[key.ToLower()]; }
         }
 
+        ///// <summary>
+        ///// 数据实体
+        ///// </summary>
+        //public Dictionary<string, Column> Entity
+        //{
+        //    get
+        //    {
+        //        return this.Dictionary as Dictionary<string, Column>;
+        //    }
+        //}
+
+        #endregion
+
+
+        #region 事件
         /// <summary>
-        /// 数据实体
+        /// 属性改变事件处理句柄
         /// </summary>
-        public Dictionary<string, Column> Entity
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected delegate void PropertyChangedHandler(object sender, PropertyChangedEventArgs e);
+
+        /// <summary>
+        /// 属性委托处理句柄
+        /// </summary>
+        private PropertyChangedHandler _OnPropertyChanged = null;
+
+        /// <summary>
+        /// 对象属性改变时发生事件
+        /// </summary>
+        protected event PropertyChangedHandler OnPropertyChanged
         {
-            get
-            {
-                return this.Dictionary as Dictionary<string, Column>;
-            }
+            add { _OnPropertyChanged += value; }
+            remove { _OnPropertyChanged -= value; }
         }
+        #endregion
+
+        #region 方法
 
         /// <summary>
         /// 写入器
@@ -83,31 +124,16 @@ namespace Snow
             }
             return default(T);
         }
-
-        #region Event
-        /// <summary>
-        /// 属性改变事件处理句柄
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected delegate void PropertyChangedHandler(object sender, PropertyChangedEventArgs e);
-
-        /// <summary>
-        /// 属性委托处理句柄
-        /// </summary>
-        private PropertyChangedHandler _OnPropertyChanged = null;
-
-        /// <summary>
-        /// 对象属性改变时发生事件
-        /// </summary>
-        protected event PropertyChangedHandler OnPropertyChanged
-        {
-            add { _OnPropertyChanged += value; }
-            remove { _OnPropertyChanged -= value; }
-        }
+        
         #endregion
     }
 
+
+    public class Table
+    {
+        public string Name { protected set; get; }
+        public PrimaryKey PrimaryKey { protected set; get; }
+    }
     /// <summary>
     /// 主键
     /// </summary>

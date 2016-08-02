@@ -17,6 +17,7 @@ namespace Snow
 
             return row;
         }
+
         /// <summary>
         /// 获取多行数据
         /// </summary>
@@ -38,7 +39,7 @@ namespace Snow
         /// <returns></returns>
         private DataRow _Row(BaseEntity model)
         {
-            string cacheKey = string.Concat(cmd.TableName, "-Row-",string.Join(" and ",cmd.CacheKey));
+            string cacheKey = string.Concat(cmd.TableName, "-Row-",string.Join("",cmd.CacheKey));
 
             Log.Debug(this.GetType().Name + "_Row",cacheKey);
 

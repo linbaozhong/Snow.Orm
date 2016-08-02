@@ -14,16 +14,27 @@ namespace Snow
         /// </summary>
         SqlParameter[] parameters;
 
+        BaseEntity entity;
+
         #endregion
 
         #region 公共方法
 
+        public Orm(BaseEntity model)
+        {
+            init();
+            entity = model;
+        }
         public Orm([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        {
+            init();
+        }
+
+        private void init()
         {
             cmd = new Snow.Sql();
             parameters = null;
         }
-
 
         /// <summary>
         /// 主键查询(不支持复合主键)
