@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snow
 {
@@ -17,7 +13,7 @@ namespace Snow
             finish();
         }
 
-        public List<T> GetList<T>(T model) where T : class, new()
+        public  List<T> GetList<T>(T model) where T : class, new()
         {
             prepare(model as BaseEntity);
             List<T> _list = _List<T>(_Rows(model as BaseEntity));
@@ -32,7 +28,7 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <param name="dt"></param>
-        private List<T> _List<T>(DataRow[] rows) where T : class, new()
+        private  List<T> _List<T>(DataRow[] rows) where T : class, new()
         {
             List<T> _list = new List<T>();
 
@@ -46,27 +42,13 @@ namespace Snow
             }
             return _list;
         }
-        private void _Model(DataRow row, BaseEntity model)
+        private  void _Model(DataRow row, BaseEntity model)
         {
             model.Clear();
 
             try
             {
                 string _key;
-                //foreach (DictionaryEntry field in table)
-                //{
-                //    _key = field.Key.ToString().ToLower();
-
-                //    if (!cmd.Fields.Contains(getName(_key)) || Convert.IsDBNull(row[_key]) || row[_key].ToString() == "")
-                //    {
-                //        continue;
-                //    }
-                //    else
-                //    {
-                //        model[_key] = row[_key];
-                //    }
-                //}
-
                 foreach (DataColumn col in row.Table.Columns)
                 {
                     _key = col.ColumnName;

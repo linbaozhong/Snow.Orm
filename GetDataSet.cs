@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 
 namespace Snow
 {
@@ -17,7 +12,7 @@ namespace Snow
         public DataSet GetDataSet(BaseEntity model)
         {
             prepare(model);
-            DataSet ds = this._Find(model);
+            DataSet ds = _Find(model);
             finish();
 
             return ds;

@@ -1,30 +1,30 @@
 ﻿using System;
-using System.Web;
-using System.Web.Caching;
+using System.Runtime.Caching;
 
 namespace Snow
 {
-  public class DataCache
-  {
-
-    public static object GetCache(string CacheKey)
+    public static class DataCache
     {
-      return HttpRuntime.Cache[CacheKey];
-    }
+        private static ObjectCache Cache = MemoryCache.Default;
 
-    public static void SetCache(string CacheKey, object objObject)
-    {
-      HttpRuntime.Cache.Insert(CacheKey, objObject);
-    }
+        public static object Get(string CacheKey)
+        {
+            return Cache.Get(CacheKey);
+        }
 
-    public static void SetCache(string CacheKey, object objObject, DateTime absoluteExpiration, TimeSpan slidingExpiration)
-    {
-      HttpRuntime.Cache.Insert(CacheKey, objObject, (CacheDependency) null, absoluteExpiration, slidingExpiration);
-    }
+        public static void Set(string CacheKey, object obj)
+        {
+            Cache.Set(CacheKey, obj, DateTime.Now.AddMinutes(30));
+        }
 
-    public static void DeleteCache(string CacheKey)
-    {
-      HttpRuntime.Cache.Remove(CacheKey);
+        public static void Set(string CacheKey, object obj, DateTime absoluteExpiration)
+        {
+            Cache.Set(CacheKey, obj, new DateTimeOffset(absoluteExpiration));
+        }
+
+        public static void Remove(string CacheKey)
+        {
+            Cache.Remove(CacheKey);
+        }
     }
-  }
 }

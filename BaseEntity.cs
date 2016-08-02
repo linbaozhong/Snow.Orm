@@ -38,8 +38,8 @@ namespace Snow
         /// <returns></returns>
         public object this[string key]
         {
-            set { this.Dictionary[key] = value; }
-            get { return this.Dictionary[key]; }
+            set { this.Dictionary[key.ToLower()] = value; }
+            get { return this.Dictionary[key.ToLower()]; }
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Snow
         /// <param name="name"></param>
         protected void Set<T>(T value, [CallerMemberName]string name = null)
         {
-            this.Dictionary[name] = value;
+            this.Dictionary[name.ToLower()] = value;
             //属性改变事件
             if (_OnPropertyChanged != null)
             {
@@ -77,9 +77,9 @@ namespace Snow
         /// <returns></returns>
         protected T Get<T>([CallerMemberName]string name = null)
         {
-            if (this.Dictionary.Contains(name))
+            if (this.Dictionary.Contains(name.ToLower()))
             {
-                return (T)this.Dictionary[name];
+                return (T)this.Dictionary[name.ToLower()];
             }
             return default(T);
         }

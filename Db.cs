@@ -8,33 +8,11 @@ namespace Snow
     {
         #region 属性
 
-        ///// <summary>
-        ///// 操作实体
-        ///// </summary>
-        //Table table = new Snow.Table();
-
         Sql cmd;
-        /// <summary>
-        /// 返回的结果
-        /// </summary>
-        Result result;
         /// <summary>
         /// 查询参数
         /// </summary>
         SqlParameter[] parameters;
-
-        /// <summary>
-        /// Cache键
-        /// </summary>
-        string cacheKey;
-
-        StaticSql staticSql;
-        /// <summary>
-        /// 静态命令键
-        /// </summary>
-        string staticKey;
-
-        //public readonly static Orm DB = new Orm();
 
         #endregion
 
@@ -42,31 +20,10 @@ namespace Snow
 
         public Orm([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
-            this.staticKey = MD5Encrypt.Get32(string.Concat(filePath,methodName,lineNumber));
-
-            this.cmd = new Sql();
+            cmd = new Snow.Sql();
+            parameters = null;
         }
 
-        /// <summary>
-        /// 如果存在静态命令，使用静态命令
-        /// 否则，创建静态命令
-        /// </summary>
-        /// <returns></returns>
-        public Orm Static() {
-            this.staticSql = new StaticSql();
-            return this;
-        }
-        /// <summary>
-        /// 如果有cache，从cache中读取
-        /// 否则，远程获取数据并存入cache
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public Orm Cache(string key)
-        {
-            this.cacheKey = key;
-            return this;
-        }
 
         /// <summary>
         /// 主键查询(不支持复合主键)
@@ -76,7 +33,10 @@ namespace Snow
         /// <returns></returns>
         public Orm Id(string key, object arg)
         {
-            this.cmd.IsKey = true;
+            //缓存键
+            cmd.CacheKey.Add(arg.ToString());
+
+            cmd.IsKey = true;
 
             cmd.Id = string.Format("[{0}] = @{0}", key);
             // 
@@ -142,7 +102,7 @@ namespace Snow
             if (cmd.Where.Count > 0)
             {
                 cmd.Where.Add(" and ");
-            } 
+            }
             parameter(condition, args);
             return this;
         }
@@ -361,7 +321,7 @@ namespace Snow
         /// <returns></returns>
         public string GetSql()
         {
-            parameters = this.cmd.Params.ToArray();
+            parameters = cmd.Params.ToArray();
 
             string[] _param = new string[parameters.Length];
             for (int i = 0; i < parameters.Length; i++)
@@ -385,9 +345,9 @@ namespace Snow
             this.parameter(sql, args);
 
             cmd.SqlString.Clear();
-            this.cmd.SqlString.AddRange(cmd.Where);
+            cmd.SqlString.AddRange(cmd.Where);
 
-            this.cmd.IsNative = true;
+            cmd.IsNative = true;
 
             return this;
         }
@@ -416,21 +376,21 @@ namespace Snow
         /// <returns></returns>
         private void createSql()
         {
-            if (this.cmd.SqlString.Count == 0)
+            if (cmd.SqlString.Count == 0)
             {
                 switch (cmd.Command.ToLower())
                 {
                     case "insert":
-                        this.insert();
+                        insert();
                         break;
                     case "update":
-                        this.update();
+                        update();
                         break;
                     case "delete":
-                        this.delete();
+                        delete();
                         break;
                     case "select":
-                        this.select();
+                        select();
                         break;
                     default:
                         break;
@@ -445,14 +405,13 @@ namespace Snow
         /// <param name="args"></param>
         private void parameter(string condition, params object[] args)
         {
-            //if (cmd.Where.Count > 0)
-            //{
-            //    cmd.Where.Add(" and ");
-            //}
+            if (condition.Trim() == "")
+                return;
+
             if (args.Length > 0)
             {
                 int _start = 0, _next = 0;
-                string _param = "@param_", _paramName = "";
+                string _param = "@param_", _paramName = "",_cond="";
                 // 参数集合元素个数
                 int _count = cmd.Params.Count;
 
@@ -461,30 +420,45 @@ namespace Snow
                     //参数名
                     _paramName = _param + _count.ToString();
                     _next = condition.IndexOf("?", _start);
+                    _cond = condition.Substring(_start, _next - _start).Trim();
 
-                    cmd.Where.Add(condition.Substring(_start, _next - _start) + _paramName);
+                    cmd.Where.Add(_cond + _paramName);
                     cmd.Params.Add(new SqlParameter(_paramName, args[i]));
 
+                    // 如果不是主键查询，构造缓存键
+                    if (!cmd.IsKey)
+                    {
+                        cmd.CacheKey.Add(_cond + args[i]);
+                    }
                     _start = _next + 1;
                     _count++;
                 }
                 // 之后的其他字符
-                cmd.Where.Add(condition.Substring(_start));
+                _cond = condition.Substring(_start).Trim();
+                cmd.Where.Add(_cond);
+                // 如果不是主键查询，构造缓存键
+                if (!cmd.IsKey && _cond != "")
+                {
+                    cmd.CacheKey.Add(_cond);
+                }
             }
             else
             {
                 cmd.Where.Add(condition);
+                // 如果不是主键查询，构造缓存键
+                if (!cmd.IsKey)
+                {
+                    cmd.CacheKey.Add(condition);
+                }
             }
         }
 
         /// <summary>
         /// 构造Select命令
         /// </summary>
-        private void trace(object msg)
+        private void trace(string msg)
         {
-            System.Diagnostics.Trace.WriteLine("");
-            System.Diagnostics.Trace.WriteLine(msg);
-            System.Diagnostics.Trace.WriteLine("");
+            Log.Debug("Snow.Orm", msg);
         }
 
         #endregion

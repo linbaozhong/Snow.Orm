@@ -163,6 +163,10 @@ namespace Snow
         /// 查询参数
         /// </summary>
         public List<SqlParameter> Params = new List<SqlParameter>();
+        /// <summary>
+        /// 缓存键
+        /// </summary>
+        public List<string> CacheKey = new List<string>();
     }
 
     class StaticSql

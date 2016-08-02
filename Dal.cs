@@ -2,11 +2,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.SqlClient;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+using System.Linq;
 
 namespace Snow
 {
@@ -18,36 +16,10 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        //public DataSet Get(BaseEntity model)
-        //{
-        //    prepare(model);
-        //    DataSet ds = null;
-        //    try
-        //    {
-        //        if (!this.cmd.IsNative)
-        //        {
-        //            // 读取一条记录
-        //            cmd.Top = 1;
-        //            // 查询准备
-        //            this.query(model);
-        //            // 构造命令
-        //            this.createSql();
-        //        }
-        //        // 读取记录集
-        //        ds = this.getDataSet();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        // 调试
-        //        this.trace(this.GetSql());
-        //        this.finish();
-        //    }
-        //    return ds;
-        //}
+        private DataSet _Get(BaseEntity model)
+        {
+            return _Find(model, 1);
+        }
 
         /// <summary>
         /// 获取数据对象列表
@@ -56,81 +28,48 @@ namespace Snow
         /// <returns></returns>
         private DataSet _Find(BaseEntity model, int top = 0)
         {
-            //prepare(model);
             DataSet ds = null;
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
-                    if (top > 0)
+                    if (!cmd.IsKey && top > 0)
                     {
                         // 读取一条记录
                         cmd.Top = top;
                     }
                     // 查询准备
-                    this.query(model);
+                    query(model);
                     // 构造命令
-                    this.createSql();
+                    createSql();
                 }
                 // 读取记录集
-                ds = this.getDataSet();
+                ds = getDataSet();
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                //this.finish();
+                trace(GetSql());
             }
             return ds;
         }
-        /// <summary>
-        /// 返回一个记录集
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        //public DataSet Find<T>()
-        //{
-        //    try
-        //    {
-        //        if (!this.cmd.IsNative)
-        //        {
-        //            // 查询准备
-        //            this.query<T>();
-        //            // 构造命令
-        //            this.createSql();
-        //        }
-
-        //        return this.getDataSet();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //    finally
-        //    {
-        //        // 调试
-        //        this.trace(this.GetSql());
-        //        this.finish();
-        //    }
-        //}
 
         /// <summary>
-        /// 插入一条新的记录
+        /// 插入一条记录
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
-        /// <returns>以Dictionary类型返回自增字段ID，在result.data中</returns>
+        /// <returns>返回自增键值</returns>
         public object Insert(BaseEntity model)
         {
             prepare(model);
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
                     // 插入
                     cmd.Command = Command.Insert;
@@ -155,7 +94,7 @@ namespace Snow
                                 continue;
                             }
 
-                            cmd.Fields.Add(getName(_fieldname));
+                            cmd.Fields.Add(_fieldname);
                             cmd.Params.Add(new SqlParameter("@" + _fieldname, field.Value));
                         }
 
@@ -166,16 +105,16 @@ namespace Snow
                         cmd.Params.Add(idParameter);
 
                     }
-                    this.createSql();
+                    createSql();
                 }
 
-                parameters = this.cmd.Params.ToArray();
+                parameters = cmd.Params.ToArray();
 
                 // 返回数据库自增关键字段值
-                DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+                DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters);
 
                 object returnVal = null;
-                foreach (SqlParameter q in this.parameters)
+                foreach (SqlParameter q in parameters)
                 {
                     if (q.Direction == ParameterDirection.Output)
                     {
@@ -187,13 +126,14 @@ namespace Snow
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                this.finish();
+                trace(GetSql());
+                finish();
             }
         }
 
@@ -203,13 +143,13 @@ namespace Snow
 
             try
             {
-                if (this.cmd.IsNative)
+                if (cmd.IsNative)
                 {
-                    this.createSql();
+                    createSql();
 
-                    parameters = this.cmd.Params.ToArray();
+                    parameters = cmd.Params.ToArray();
 
-                    return DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters) > 0;
+                    return DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters) > 0;
                 }
                 else
                 {
@@ -246,7 +186,7 @@ namespace Snow
                                 {
                                     continue;
                                 }
-                                cmd.Fields.Add(getName(_fieldname));
+                                cmd.Fields.Add(_fieldname);
 
                                 cmd.Params.Add(new SqlParameter("@" + _fieldname, field.Value));
 
@@ -257,14 +197,14 @@ namespace Snow
 
                             //cmd.Params.Add(idParameter);
 
-                            this.createSql();
+                            createSql();
 
-                            parameters = this.cmd.Params.ToArray();
+                            parameters = cmd.Params.ToArray();
 
-                            l_command.Add(new CommandInfo(string.Join(" ", this.cmd.SqlString), this.parameters));
+                            l_command.Add(new CommandInfo(string.Join(" ", cmd.SqlString), parameters));
 
                             // 调试
-                            this.trace(this.GetSql());
+                            trace(GetSql());
 
                             cmd.Fields.Clear();
                             cmd.Params.Clear();
@@ -277,11 +217,12 @@ namespace Snow
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
-                this.finish();
+                finish();
             }
         }
         /// <summary>
@@ -292,10 +233,10 @@ namespace Snow
         /// <returns></returns>
         public bool Update(BaseEntity model)
         {
-            this.prepare(model);
+            prepare(model);
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
                     // 更新
                     cmd.Command = Command.Update;
@@ -319,7 +260,7 @@ namespace Snow
                                 continue;
                             }
 
-                            cmd.Fields.Add(getName(_fieldname));
+                            cmd.Fields.Add(_fieldname);
                             cmd.Params.Add(new SqlParameter("@" + _fieldname, field.Value));
                         }
                     }
@@ -334,22 +275,23 @@ namespace Snow
                             }
                         }
                     }
-                    this.createSql();
+                    createSql();
                 }
 
-                parameters = this.cmd.Params.ToArray();
+                parameters = cmd.Params.ToArray();
 
-                return DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters) > 0;
+                return DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters) > 0;
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                this.finish();
+                trace(GetSql());
+                finish();
             }
         }
         /// <summary>
@@ -360,29 +302,30 @@ namespace Snow
         /// <returns></returns>
         public bool Delete<T>() where T : class, new()
         {
-            this.prepare(new T() as BaseEntity);
+            prepare(new T() as BaseEntity);
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
                     // 删除
                     cmd.Command = Command.Delete;
-                    this.createSql();
+                    createSql();
                 }
 
-                parameters = this.cmd.Params.ToArray();
+                parameters = cmd.Params.ToArray();
 
-                return DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters) > 0;
+                return DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters) > 0;
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                this.finish();
+                trace(GetSql());
+                finish();
             }
         }
         /// <summary>
@@ -394,31 +337,32 @@ namespace Snow
         public bool Exists<T>() where T : class, new()
         {
             var model = new T() as BaseEntity;
-            this.prepare(model);
+            prepare(model);
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
                     // 查询准备
-                    this.query(model);
+                    query(model);
                     // 构造命令
-                    this.createSql();
+                    createSql();
                 }
 
-                parameters = this.cmd.Params.ToArray();
+                parameters = cmd.Params.ToArray();
 
-                return DbHelperSQL.Exists(string.Join(" ", this.cmd.SqlString), this.parameters);
+                return DbHelperSQL.Exists(string.Join(" ", cmd.SqlString), parameters);
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
+                trace(GetSql());
 
-                this.finish();
+                finish();
             }
         }
         /// <summary>
@@ -432,34 +376,35 @@ namespace Snow
             if (model == null)
                 model = new T() as BaseEntity;
 
-            this.prepare(model);
+            prepare(model);
 
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
-                    this.cmd.Fields.Add("count(1)");
+                    cmd.Fields.Add("count(1)");
                     // 查询准备
-                    this.query(model);
+                    query(model);
                     // 构造命令
-                    this.createSql();
+                    createSql();
                 }
 
-                parameters = this.cmd.Params.ToArray();
+                parameters = cmd.Params.ToArray();
 
-                object n = DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
+                object n = DbHelperSQL.GetSingle(string.Join(" ", cmd.SqlString), parameters);
 
                 return Convert.ToInt64(n);
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                this.finish();
+                trace(GetSql());
+                finish();
             }
         }
         /// <summary>
@@ -473,31 +418,32 @@ namespace Snow
             if (model == null)
                 model = new T() as BaseEntity;
 
-            this.prepare(model);
+            prepare(model);
 
             try
             {
-                if (!this.cmd.IsNative)
+                if (!cmd.IsNative)
                 {
                     // 查询准备
-                    this.query(model);
+                    query(model);
                     // 构造命令
-                    this.createSql();
+                    createSql();
                 }
 
-                parameters = this.cmd.Params.ToArray();
+                parameters = cmd.Params.ToArray();
 
-                return DbHelperSQL.GetSingle(string.Join(" ", this.cmd.SqlString), this.parameters);
+                return DbHelperSQL.GetSingle(string.Join(" ", cmd.SqlString), parameters);
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                this.finish();
+                trace(GetSql());
+                finish();
             }
         }
         /// <summary>
@@ -506,14 +452,14 @@ namespace Snow
         /// <returns></returns>
         public int Exec()
         {
-            this.prepare();
+            prepare();
             try
             {
-                if (this.cmd.IsNative)
+                if (cmd.IsNative)
                 {
-                    parameters = this.cmd.Params.ToArray();
+                    parameters = cmd.Params.ToArray();
 
-                    return DbHelperSQL.ExecuteSql(string.Join(" ", this.cmd.SqlString), this.parameters);
+                    return DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters);
                 }
                 else
                 {
@@ -522,13 +468,14 @@ namespace Snow
             }
             catch (Exception e)
             {
+                trace(e.Message);
                 throw e;
             }
             finally
             {
                 // 调试
-                this.trace(this.GetSql());
-                this.finish();
+                trace(GetSql());
+                finish();
             }
         }
 
@@ -542,17 +489,18 @@ namespace Snow
         /// <returns></returns>
         public int Procedure(string procedureName, BaseEntity model, params Direction[] direction)
         {
-            this.prepare(model);
+            prepare(model);
             // 
             if (string.IsNullOrWhiteSpace(procedureName))
             {
+                trace("存储过程名缺失");
                 throw new Exception("存储过程名缺失");
             }
             else
             {
                 try
                 {
-                    if (!this.cmd.IsNative)
+                    if (!cmd.IsNative)
                     {
                         // 将输入输出参数数组转为字典
                         Dictionary<string, ParameterDirection> d_param = new Dictionary<string, ParameterDirection>();
@@ -579,7 +527,7 @@ namespace Snow
                                     continue;
                                 }
 
-                                cmd.Fields.Add(getName(_fieldname));
+                                cmd.Fields.Add(_fieldname);
 
                                 SqlParameter param = new SqlParameter("@" + _fieldname, field.Value);
                                 // 参数方向
@@ -616,17 +564,18 @@ namespace Snow
                     }
                     int rowsAffected = 0;
 
-                    parameters = this.cmd.Params.ToArray();
+                    parameters = cmd.Params.ToArray();
 
                     return DbHelperSQL.RunProcedure(procedureName, parameters, out rowsAffected);
                 }
                 catch (Exception e)
                 {
+                    trace(e.Message);
                     throw e;
                 }
                 finally
                 {
-                    this.finish();
+                    finish();
                 }
             }
         }
@@ -635,20 +584,40 @@ namespace Snow
 
 
         #region 私有方法
+
+        private void prepare()
+        {
+
+        }
+        /// <summary>
+        /// 结束处理
+        /// </summary>
+        private void finish()
+        {
+            cmd = new Snow.Sql();
+            parameters = null;
+        }
+
         /// <summary>
         /// 预处理
         /// </summary>
         private void prepare(BaseEntity model)
         {
-            prepare();
+            // 读取表名
             getTableName(model);
+            // 主键查询
+            if (model.PrimaryKey.Key != null && model[model.PrimaryKey.Key] != null 
+                && model[model.PrimaryKey.Key].ToString() != "" && model[model.PrimaryKey.Key].ToString() != "0")
+            {
+                Id(model.PrimaryKey.Key, model[model.PrimaryKey.Key]);
+            }
         }
 
         private void getTableName(BaseEntity model)
         {
-            if (string.IsNullOrWhiteSpace(this.cmd.TableName))
+            if (string.IsNullOrWhiteSpace(cmd.TableName))
             {
-                this.cmd.TableName = model.TableName;
+                cmd.TableName = model.TableName;
             }
         }
 
@@ -659,7 +628,7 @@ namespace Snow
             string _guid = model.GetType().GUID.ToString();
 
             // 读取cache
-            object _obj = DataCache.GetCache(_guid);
+            object _obj = DataCache.Get(_guid);
 
             if (_obj == null)
             {
@@ -673,7 +642,7 @@ namespace Snow
 
                 _obj = _tables;
 
-                DataCache.SetCache(_guid, _obj);
+                DataCache.Set(_guid, _obj);
             }
 
             return _obj as Table[];
@@ -688,13 +657,13 @@ namespace Snow
             string _guid = model.GetType().GUID.ToString();
 
             // 读取cache
-            object _obj = DataCache.GetCache(_guid);
+            object _obj = DataCache.Get(_guid);
 
             if (_obj == null)
             {
                 _obj = getRuntimeEntity(model);
 
-                DataCache.SetCache(_guid, _obj);
+                DataCache.Set(_guid, _obj);
             }
             return _obj as Table;
         }
@@ -722,40 +691,28 @@ namespace Snow
             }
             return _table;
         }
+        ///// <summary>
+        ///// 读取映射的表名
+        ///// </summary>
+        ///// <param name="type"></param>
+        ///// <returns></returns>
+        //string getTableName(Type type)
+        //{
+        //    if (string.IsNullOrWhiteSpace(cmd.TableName))
+        //    {
+        //        TableAttribute t_attr = type.GetCustomAttribute(typeof(TableAttribute), false) as TableAttribute;
+        //        if (t_attr == null)
+        //        {
+        //            cmd.TableName = getName(type.Name);
+        //        }
+        //        else
+        //        {
+        //            cmd.TableName = getName(t_attr.Name);
+        //        }
+        //    }
 
-        private void prepare()
-        {
-            //result = new Result();
-        }
-        /// <summary>
-        /// 结束处理
-        /// </summary>
-        private void finish()
-        {
-            //this.cmd = new Sql();
-        }
-        /// <summary>
-        /// 读取映射的表名
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        string getTableName(Type type)
-        {
-            if (string.IsNullOrWhiteSpace(cmd.TableName))
-            {
-                TableAttribute t_attr = type.GetCustomAttribute(typeof(TableAttribute), false) as TableAttribute;
-                if (t_attr == null)
-                {
-                    cmd.TableName = getName(type.Name);
-                }
-                else
-                {
-                    cmd.TableName = getName(t_attr.Name);
-                }
-            }
-
-            return cmd.TableName;
-        }
+        //    return cmd.TableName;
+        //}
         /// <summary>
         /// 读取全部映射字段
         /// </summary>
@@ -765,45 +722,6 @@ namespace Snow
         {
             return "[" + str + "]";
         }
-        //private void query<T>(T model = default(T))
-        //{
-        //    cmd.Command = Command.Select;
-
-        //    // 获取对象的类型
-        //    Type m_type = typeof(T);
-        //    //// 表名
-        //    //this.getTableName(m_type);
-
-        //    // 如果没有指定返回列，则返回传入参数对象的全部列
-        //    if (cmd.Fields.Count == 0)
-        //    {
-        //        foreach (var field in table[0].Fields)
-        //        {
-        //            // 忽略排除字段
-        //            if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Name))
-        //            {
-        //                continue;
-        //            }
-        //            cmd.Fields.Add(getName(field.Name));
-
-        //        }
-        //        //// 获取该对象的全部属性
-        //        //PropertyInfo[] properties = m_type.GetProperties();
-
-        //        //for (int i = 0, len = properties.Length; i < len; i++)
-        //        //{
-
-        //        //    // 忽略排除字段
-        //        //    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(properties[i].Name.ToLower()))
-        //        //    {
-        //        //        continue;
-        //        //    }
-        //        //    cmd.Fields.Add(getName(properties[i].Name.ToLower()));
-        //        //    //
-        //        //    //properties[i].GetValue(model);
-        //        //}
-        //    }
-        //}
 
         private void query(BaseEntity model)
         {
@@ -812,14 +730,21 @@ namespace Snow
             // 如果没有指定返回列，则返回传入参数对象的全部列
             if (cmd.Fields.Count == 0)
             {
+                // 主键
+                HashSet<string> primary = new HashSet<string>(model.PrimaryKey.Key.Split(','));
+
+                string _fieldname = "";
+
                 foreach (DictionaryEntry field in model)
                 {
+                    _fieldname = field.Key.ToString();
                     // 忽略排除字段
-                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(field.Key.ToString()))
+                    if (cmd.ExcludeFields.Count > 0 && cmd.ExcludeFields.Contains(_fieldname)
+                         || primary.Contains(_fieldname))
                     {
                         continue;
                     }
-                    cmd.Fields.Add(getName(field.Key.ToString()));
+                    cmd.Fields.Add(field.Key.ToString());
 
                 }
             }
@@ -831,27 +756,11 @@ namespace Snow
         /// <returns></returns>
         private DataSet getDataSet()
         {
-            parameters = this.cmd.Params.ToArray();
+            parameters = cmd.Params.ToArray();
 
-            return DbHelperSQL.Query(string.Join(" ", this.cmd.SqlString), parameters);
+            return DbHelperSQL.Query(string.Join(" ", cmd.SqlString), parameters);
         }
 
-        ///// <summary>
-        ///// 获取一个对象实体
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="model"></param>
-        //private void getModel(BaseEntity model)
-        //{
-        //    DataSet ds = this.getDataSet();
-
-        //    if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
-        //    {
-        //        return;
-        //    }
-
-        //    dataRow2Model(model, ds.Tables[0].Rows[0]);
-        //}
         /// <summary>
         /// 构造select命令
         /// </summary>
@@ -869,11 +778,11 @@ namespace Snow
                 {
                     string _countSql = string.Format("{0} count(1) from {1} where {2}", cmd.Command, cmd.TableName, string.Join(" ", cmd.Where.ToArray()));
                     // 调试
-                    this.trace(_countSql);
+                    trace(_countSql);
 
-                    parameters = this.cmd.Params.ToArray();
+                    parameters = cmd.Params.ToArray();
 
-                    object n = DbHelperSQL.GetSingle(_countSql, this.parameters);
+                    object n = DbHelperSQL.GetSingle(_countSql, parameters);
 
                     cmd.Page.rowsCount = Convert.ToInt64(n);
 
@@ -885,15 +794,11 @@ namespace Snow
                         cmd.Page.endIndex = cmd.Page.pageIndex * cmd.Page.pageSize;
                         cmd.Page.startIndex = cmd.Page.endIndex - cmd.Page.pageSize + 1;
                     }
-                    //
-                    result.data = cmd.Page;
                 }
                 catch (Exception e)
                 {
-                    result.status = -1;
-                    result.data = e;
-
-                    return;
+                    trace(e.Message);
+                    throw e;
                 }
 
                 // Fields
@@ -903,7 +808,7 @@ namespace Snow
                 }
                 else
                 {
-                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
+                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields.Select(x => getName(x)))));
                 }
 
                 //
@@ -942,10 +847,10 @@ namespace Snow
                 }
                 else
                 {
-                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
+                    cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields.Select(x => getName(x)))));
                 }
                 // From
-                cmd.SqlString.Add(string.Format(" from {0}", getName(this.cmd.TableName)));
+                cmd.SqlString.Add(string.Format(" from {0}", getName(cmd.TableName)));
 
                 // Join
                 if (cmd.Join.Count > 0)
@@ -954,7 +859,7 @@ namespace Snow
                 }
 
                 // 如果是主键查询
-                if (this.cmd.IsKey)
+                if (cmd.IsKey)
                 {
                     cmd.SqlString.Add(" where " + cmd.Id);
                 }
@@ -997,12 +902,12 @@ namespace Snow
             // 命令
             cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
-            cmd.SqlString.Add(getName(this.cmd.TableName));
+            cmd.SqlString.Add(getName(cmd.TableName));
             // Fields
             if (cmd.Fields.Count > 0)
             {
                 cmd.SqlString.Add("(");
-                cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields)));
+                cmd.SqlString.Add(string.Format(" {0}", string.Join(",", cmd.Fields.Select(x => getName(x)))));
                 cmd.SqlString.Add(")");
             }
 
@@ -1034,7 +939,7 @@ namespace Snow
             // 命令
             cmd.SqlString.Clear();
             cmd.SqlString.Add(cmd.Command);
-            cmd.SqlString.Add(cmd.TableName);
+            cmd.SqlString.Add(getName(cmd.TableName));
             cmd.SqlString.Add("set");
 
             // Fields
@@ -1045,12 +950,12 @@ namespace Snow
 
                 for (int i = 0; i < _count; i++)
                 {
-                    _set[i] = cmd.Fields[i] + "=@" + cmd.Fields[i].ToLower();
+                    _set[i] = getName(cmd.Fields[i]) + "=@" + cmd.Fields[i].ToLower();
                 }
                 cmd.SqlString.Add(string.Join(",", _set));
             }
             // Where
-            if (this.cmd.IsKey)
+            if (cmd.IsKey)
             {
                 cmd.SqlString.Add("where " + cmd.Id);
             }
@@ -1058,12 +963,12 @@ namespace Snow
             {
                 if (cmd.Where.Count > 0)
                 {
-                    cmd.SqlString.Add(string.Format("where {0}", string.Join(" ", cmd.Where.ToArray())));
+                    cmd.SqlString.Add(string.Format("where {0}", string.Join(" ", cmd.Where)));
                 }
             }
 
             //
-            //this._sqlStr = string.Join(" ", _cmd);
+            //_sqlStr = string.Join(" ", _cmd);
         }
         /// <summary>
         /// 构造delete命令
@@ -1076,7 +981,7 @@ namespace Snow
             // From
             cmd.SqlString.Add(cmd.TableName);
             // Where
-            if (this.cmd.IsKey)
+            if (cmd.IsKey)
             {
                 cmd.SqlString.Add("where " + cmd.Id);
             }
@@ -1088,57 +993,6 @@ namespace Snow
                 }
             }
         }
-        /// <summary>
-        /// table转list
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <param name="dt"></param>
-        //private void dataTable2List<T>(List<T> model, DataTable dt) where T : class, new()
-        //{
-        //    foreach (DataRow row in dt.Rows)
-        //    {
-        //        T m_t = new T();
-
-        //        this.dataRow2Model(m_t, row);
-
-        //        model.Add(m_t);
-        //    }
-        //}
-        /// <summary>
-        /// datarow转model
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
-        /// <param name="row"></param>
-        //private void dataRow2Model(BaseEntity model, DataRow row)
-        //{
-        //    // 根据查询字段列，填充对象
-        //    try
-        //    {
-        //        // 对象属性名
-        //        string _columnName;
-
-        //        // 遍历对象属性，并按需赋值
-        //        foreach (DictionaryEntry p in this.table)
-        //        {
-        //            _columnName = p.Key.ToString();
-
-        //            if (!cmd.Fields.Contains(getName(_columnName)) || Convert.IsDBNull(row[_columnName]) || row[_columnName].ToString() == "")
-        //            {
-        //                continue;
-        //            }
-        //            else
-        //            {
-        //                model[_columnName] = row[_columnName];
-        //            }
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        throw e;
-        //    }
-        //}
 
         #endregion
     }

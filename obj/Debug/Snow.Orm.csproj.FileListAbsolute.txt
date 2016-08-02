@@ -5,7 +5,6 @@ E:\项目\asp.net\Shebao\Snow.Orm\obj\Debug\Snow.Orm.dll
 E:\项目\asp.net\Shebao\Snow.Orm\obj\Debug\Snow.Orm.pdb
 C:\Snow\Net\Snow.Orm\bin\Debug\Snow.Orm.dll
 C:\Snow\Net\Snow.Orm\bin\Debug\Snow.Orm.pdb
-C:\Snow\Net\Snow.Orm\obj\Debug\Snow.Orm.csprojResolveAssemblyReference.cache
 C:\Snow\Net\Snow.Orm\obj\Debug\Snow.Orm.dll
 C:\Snow\Net\Snow.Orm\obj\Debug\Snow.Orm.pdb
 E:\项目\asp.net\Shebao\Snow.Orm\bin\Debug\Shangshebao.DBUtility.dll
@@ -22,3 +21,4 @@ D:\Snow\Snow.Orm\obj\Debug\Snow.Orm.pdb
 D:\Snow\Snow.Orm\bin\Debug\Snow.Orm.dll
 D:\Snow\Snow.Orm\bin\Debug\Snow.Orm.pdb
 D:\Snow\Snow.Orm\obj\Debug\Snow.Orm.csprojResolveAssemblyReference.cache
+C:\Snow\Net\Snow.Orm\obj\Debug\Snow.Orm.csprojResolveAssemblyReference.cache

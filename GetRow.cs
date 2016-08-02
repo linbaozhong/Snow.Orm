@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 
 namespace Snow
 {
@@ -43,13 +38,24 @@ namespace Snow
         /// <returns></returns>
         private DataRow _Row(BaseEntity model)
         {
-            DataSet ds = this._Find(model, 1);
+            string cacheKey = string.Concat(cmd.TableName, "-Row-",string.Join(" and ",cmd.CacheKey));
 
-            if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+            Log.Debug(this.GetType().Name + "_Row",cacheKey);
+
+            object obj = DataCache.Get(cacheKey);
+
+            if (obj == null)
             {
-                return null;
+                DataSet ds = _Get(model);
+
+                if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
+                {
+                    return null;
+                }
+                obj = ds.Tables[0].Rows[0];
+                DataCache.Set(cacheKey, obj);
             }
-            return ds.Tables[0].Rows[0];
+            return obj as DataRow;
         }
         /// <summary>
         /// 获取多行数据
@@ -58,7 +64,7 @@ namespace Snow
         /// <returns></returns>
         private DataRow[] _Rows(BaseEntity model)
         {
-            DataSet ds = this._Find(model);
+            DataSet ds = _Find(model);
 
             if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
             {
