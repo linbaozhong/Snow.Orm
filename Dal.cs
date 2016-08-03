@@ -16,9 +16,9 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DataSet _Get(BaseEntity model)
+        private DataSet _Get()
         {
-            return _Find(model, 1);
+            return _Find(1);
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DataSet _Find(BaseEntity model, int top = 0)
+        private DataSet _Find(int top = 0)
         {
             DataSet ds = null;
             try
@@ -39,7 +39,7 @@ namespace Snow
                         cmd.Top = top;
                     }
                     // 查询准备
-                    query(model);
+                    query();
                     // 构造命令
                     createSql();
                 }
@@ -62,11 +62,10 @@ namespace Snow
         /// <summary>
         /// 插入一条记录
         /// </summary>
-        /// <param name="model"></param>
         /// <returns>返回自增键值</returns>
-        public object Insert(BaseEntity model)
+        public object Insert()
         {
-            prepare(model);
+            prepare();
             try
             {
                 if (!cmd.IsNative)
@@ -78,13 +77,13 @@ namespace Snow
                     if (cmd.Fields.Count == 0)
                     {
                         // 主键
-                        HashSet<string> primary = new HashSet<string>(model.PrimaryKey.Key.Split(','));
-                        var isGenerate = model.PrimaryKey.Type;
+                        HashSet<string> primary = new HashSet<string>(entity.Table.PrimaryKey.Key.Split(','));
+                        var isGenerate = entity.Table.PrimaryKey.Type;
 
                         // 字段名
                         string _fieldname = "";
 
-                        foreach (DictionaryEntry field in model)
+                        foreach (DictionaryEntry field in entity)
                         {
                             _fieldname = field.Key.ToString().ToLower();
                             // 忽略排除字段和数据库计算字段
@@ -139,8 +138,6 @@ namespace Snow
 
         public bool Insert<T>(List<T> list) where T : class, new()
         {
-            prepare();
-
             try
             {
                 if (cmd.IsNative)
@@ -171,10 +168,10 @@ namespace Snow
                         {
                             _model = model as BaseEntity;
                             // 表名
-                            cmd.TableName = _model.TableName;
+                            cmd.TableName = _model.Table.Name;
 
-                            primary = new HashSet<string>(_model.PrimaryKey.Key.Split(','));
-                            isGenerate = _model.PrimaryKey.Type;
+                            primary = new HashSet<string>(_model.Table.PrimaryKey.Key.Split(','));
+                            isGenerate = _model.Table.PrimaryKey.Type;
 
                             string _fieldname;
                             foreach (DictionaryEntry field in _model)
@@ -231,9 +228,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Update(BaseEntity model)
+        public bool Update()
         {
-            prepare(model);
+            prepare();
             try
             {
                 if (!cmd.IsNative)
@@ -241,8 +238,8 @@ namespace Snow
                     // 更新
                     cmd.Command = Command.Update;
                     // 主键
-                    HashSet<string> primary = new HashSet<string>(model.PrimaryKey.Key.Split(','));
-                    var isGenerate = model.PrimaryKey.Type;
+                    HashSet<string> primary = new HashSet<string>(entity.Table.PrimaryKey.Key.Split(','));
+                    var isGenerate = entity.Table.PrimaryKey.Type;
 
                     // 字段名
                     string _fieldname = "";
@@ -250,7 +247,7 @@ namespace Snow
                     // 如果没有指定更新列，则更新传入参数对象的全部列
                     if (cmd.Fields.Count == 0)
                     {
-                        foreach (DictionaryEntry field in model)
+                        foreach (DictionaryEntry field in entity)
                         {
                             _fieldname = field.Key.ToString().ToLower();
                             // 忽略排除字段和数据库计算字段
@@ -266,7 +263,7 @@ namespace Snow
                     }
                     else
                     {
-                        foreach (DictionaryEntry field in model)
+                        foreach (DictionaryEntry field in entity)
                         {
                             _fieldname = field.Key.ToString().ToLower();
                             if (cmd.Fields.Contains(_fieldname))
@@ -302,7 +299,7 @@ namespace Snow
         /// <returns></returns>
         public bool Delete<T>() where T : class, new()
         {
-            prepare(new T() as BaseEntity);
+            prepare();
             try
             {
                 if (!cmd.IsNative)
@@ -337,13 +334,13 @@ namespace Snow
         public bool Exists<T>() where T : class, new()
         {
             var model = new T() as BaseEntity;
-            prepare(model);
+            prepare();
             try
             {
                 if (!cmd.IsNative)
                 {
                     // 查询准备
-                    query(model);
+                    query();
                     // 构造命令
                     createSql();
                 }
@@ -376,7 +373,7 @@ namespace Snow
             if (model == null)
                 model = new T() as BaseEntity;
 
-            prepare(model);
+            prepare();
 
             try
             {
@@ -384,7 +381,7 @@ namespace Snow
                 {
                     cmd.Fields.Add("count(1)");
                     // 查询准备
-                    query(model);
+                    query();
                     // 构造命令
                     createSql();
                 }
@@ -418,14 +415,14 @@ namespace Snow
             if (model == null)
                 model = new T() as BaseEntity;
 
-            prepare(model);
+            prepare();
 
             try
             {
                 if (!cmd.IsNative)
                 {
                     // 查询准备
-                    query(model);
+                    query();
                     // 构造命令
                     createSql();
                 }
@@ -452,7 +449,6 @@ namespace Snow
         /// <returns></returns>
         public int Exec()
         {
-            prepare();
             try
             {
                 if (cmd.IsNative)
@@ -487,9 +483,9 @@ namespace Snow
         /// <param name="model"></param>
         /// <param name="outputs">参数</param>
         /// <returns></returns>
-        public int Procedure(string procedureName, BaseEntity model, params Direction[] direction)
+        public int Procedure(string procedureName, params Direction[] direction)
         {
-            prepare(model);
+            prepare();
             // 
             if (string.IsNullOrWhiteSpace(procedureName))
             {
@@ -508,8 +504,8 @@ namespace Snow
                         Array.ForEach(direction, d => d_param.Add(d.field.ToLower(), d.direction));
 
                         // 主键
-                        HashSet<string> primary = new HashSet<string>(model.PrimaryKey.Key.Split(','));
-                        var isGenerate = model.PrimaryKey.Type;
+                        HashSet<string> primary = new HashSet<string>(entity.Table.PrimaryKey.Key.Split(','));
+                        var isGenerate = entity.Table.PrimaryKey.Type;
 
                         // 字段名
                         string _fieldname = "";
@@ -517,7 +513,7 @@ namespace Snow
                         // 如果没有指定更新列，则更新传入参数对象的全部列
                         if (cmd.Fields.Count == 0)
                         {
-                            foreach (DictionaryEntry field in model)
+                            foreach (DictionaryEntry field in entity)
                             {
                                 _fieldname = field.Key.ToString().ToLower();
                                 // 忽略排除字段和数据库计算字段
@@ -543,7 +539,7 @@ namespace Snow
                         }
                         else
                         {
-                            foreach (DictionaryEntry field in model)
+                            foreach (DictionaryEntry field in entity)
                             {
                                 _fieldname = field.Key.ToString().ToLower();
                                 // 
@@ -585,10 +581,6 @@ namespace Snow
 
         #region 私有方法
 
-        private void prepare()
-        {
-
-        }
         /// <summary>
         /// 结束处理
         /// </summary>
@@ -601,28 +593,28 @@ namespace Snow
         /// <summary>
         /// 预处理
         /// </summary>
-        private void prepare(BaseEntity model)
+        private void prepare()
         {
             // 读取表名
-            getTableName(model);
+            getTableName();
             // 主键查询
             if (cmd.IsKey 
-                || model.PrimaryKey.Key == null 
-                || model[model.PrimaryKey.Key] == null
-                || model[model.PrimaryKey.Key].ToString() == "" 
-                || model[model.PrimaryKey.Key].ToString() == "0")
+                || entity.Table.PrimaryKey.Key == null 
+                || entity[entity.Table.PrimaryKey.Key] == null
+                || entity[entity.Table.PrimaryKey.Key].ToString() == "" 
+                || entity[entity.Table.PrimaryKey.Key].ToString() == "0")
             {
                 return;
             }
 
-            Id(model.PrimaryKey.Key, model[model.PrimaryKey.Key]);
+            Id(entity.Table.PrimaryKey.Key, entity[entity.Table.PrimaryKey.Key]);
         }
 
-        private void getTableName(BaseEntity model)
+        private void getTableName()
         {
             if (string.IsNullOrWhiteSpace(cmd.TableName))
             {
-                cmd.TableName = model.TableName;
+                cmd.TableName = entity.Table.Name;
             }
         }
 
@@ -728,7 +720,7 @@ namespace Snow
             return "[" + str + "]";
         }
 
-        private void query(BaseEntity model)
+        private void query()
         {
             cmd.Command = Command.Select;
 
@@ -736,11 +728,11 @@ namespace Snow
             if (cmd.Fields.Count == 0)
             {
                 // 主键
-                HashSet<string> primary = new HashSet<string>(model.PrimaryKey.Key.Split(','));
+                HashSet<string> primary = new HashSet<string>(entity.Table.PrimaryKey.Key.Split(','));
 
                 string _fieldname = "";
 
-                foreach (DictionaryEntry field in model)
+                foreach (DictionaryEntry field in entity)
                 {
                     _fieldname = field.Key.ToString();
                     // 忽略排除字段

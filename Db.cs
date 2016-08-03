@@ -49,7 +49,14 @@ namespace Snow
 
             cmd.IsKey = true;
 
-            cmd.Id = string.Format("[{0}] = @{0}", key);
+            if (string.IsNullOrWhiteSpace(cmd.Id))
+            {
+                cmd.Id = string.Format("[{0}] = @{0}", key);
+            }
+            else
+            {
+                cmd.Id += string.Format(" and [{0}] = @{0}", key);
+            }
             // 
             cmd.Params.Add(new SqlParameter("@" + key, arg));
 
@@ -422,7 +429,7 @@ namespace Snow
             if (args.Length > 0)
             {
                 int _start = 0, _next = 0;
-                string _param = "@param_", _paramName = "",_cond="";
+                string _param = "@param_", _paramName = "", _cond = "";
                 // 参数集合元素个数
                 int _count = cmd.Params.Count;
 

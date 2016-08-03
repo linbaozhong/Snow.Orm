@@ -7,12 +7,11 @@ namespace Snow
         /// <summary>
         /// 获取单行数据
         /// </summary>
-        /// <param name="model"></param>
         /// <returns></returns>
-        public DataRow GetRow(BaseEntity model)
+        public DataRow GetRow()
         {
-            prepare(model);
-            DataRow row = _Row(model);
+            prepare();
+            DataRow row = _Row();
             finish();
 
             return row;
@@ -21,12 +20,11 @@ namespace Snow
         /// <summary>
         /// 获取多行数据
         /// </summary>
-        /// <param name="model"></param>
         /// <returns></returns>
-        public DataRow[] GetRows(BaseEntity model)
+        public DataRow[] GetRows()
         {
-            prepare(model);
-            DataRow[] rows = _Rows(model);
+            prepare();
+            DataRow[] rows = _Rows();
             finish();
 
             return rows;
@@ -37,9 +35,9 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DataRow _Row(BaseEntity model)
+        private DataRow _Row()
         {
-            string cacheKey = string.Concat(cmd.TableName, "-Row-",string.Join("",cmd.CacheKey));
+            string cacheKey = string.Concat(cmd.TableName, "-Row-",string.Join(" ",cmd.CacheKey));
 
             Log.Debug(this.GetType().Name + "_Row",cacheKey);
 
@@ -47,7 +45,7 @@ namespace Snow
 
             if (obj == null)
             {
-                DataSet ds = _Get(model);
+                DataSet ds = _Get();
 
                 if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
                 {
@@ -61,11 +59,10 @@ namespace Snow
         /// <summary>
         /// 获取多行数据
         /// </summary>
-        /// <param name="model"></param>
         /// <returns></returns>
-        private DataRow[] _Rows(BaseEntity model)
+        private DataRow[] _Rows()
         {
-            DataSet ds = _Find(model);
+            DataSet ds = _Find();
 
             if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
             {

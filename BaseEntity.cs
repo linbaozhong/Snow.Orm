@@ -16,32 +16,35 @@ namespace Snow
         public BaseEntity()
         {
             DB = new Orm(this);
+            Table = new Table();
         }
 
         #region 属性
 
         public Orm DB;
-        /// <summary>
-        /// 数据表名
-        /// </summary>
-        public string TableName
-        {
-            protected set;
-            get;
-        }
+        ///// <summary>
+        ///// 数据表名
+        ///// </summary>
+        //public string TableName
+        //{
+        //    protected set;
+        //    get;
+        //}
 
-        /// <summary>
-        /// 主键
-        /// </summary>
-        public PrimaryKey PrimaryKey
-        {
-            protected set;
-            get;
-        }
+        ///// <summary>
+        ///// 主键
+        ///// </summary>
+        //public PrimaryKey PrimaryKey
+        //{
+        //    protected set;
+        //    get;
+        //}
 
+            /// <summary>
+            /// 映射数据表属性
+            /// </summary>
         public Table Table
         {
-            protected set;
             get;
         }
         /// <summary>
@@ -131,8 +134,8 @@ namespace Snow
 
     public class Table
     {
-        public string Name { protected set; get; }
-        public PrimaryKey PrimaryKey { protected set; get; }
+        public string Name { set; get; }
+        public PrimaryKey PrimaryKey {  set; get; }
     }
     /// <summary>
     /// 主键
