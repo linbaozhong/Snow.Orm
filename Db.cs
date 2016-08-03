@@ -20,12 +20,12 @@ namespace Snow
 
         #region 公共方法
 
-        public Orm(BaseEntity model)
+        internal Orm(BaseEntity model)
         {
             init();
             entity = model;
         }
-        public Orm([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        internal Orm([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
         {
             init();
         }
@@ -364,7 +364,7 @@ namespace Snow
         /// 获取最终sql命令
         /// </summary>
         /// <returns></returns>
-        public string GetSql()
+        private string getSql()
         {
             parameters = cmd.Params.ToArray();
 

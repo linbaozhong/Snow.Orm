@@ -54,7 +54,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
             }
             return ds;
         }
@@ -131,7 +131,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
                 finish();
             }
         }
@@ -201,7 +201,7 @@ namespace Snow
                             l_command.Add(new CommandInfo(string.Join(" ", cmd.SqlString), parameters));
 
                             // 调试
-                            trace(GetSql());
+                            trace(getSql());
 
                             cmd.Fields.Clear();
                             cmd.Params.Clear();
@@ -294,7 +294,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
                 finish();
             }
         }
@@ -304,7 +304,7 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Delete<T>() where T : class, new()
+        public bool Delete()
         {
             prepare();
             try
@@ -328,7 +328,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
                 finish();
             }
         }
@@ -338,9 +338,8 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Exists<T>() where T : class, new()
+        public bool Exists()
         {
-            var model = new T() as BaseEntity;
             prepare();
             try
             {
@@ -364,7 +363,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
 
                 finish();
             }
@@ -372,14 +371,9 @@ namespace Snow
         /// <summary>
         /// 统计符合条件的记录数
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
         /// <returns></returns>
-        public Int64 Count<T>(BaseEntity model = null) where T : class, new()
+        public Int64 Count()
         {
-            if (model == null)
-                model = new T() as BaseEntity;
-
             prepare();
 
             try
@@ -407,20 +401,19 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
                 finish();
             }
         }
+        //public object Single<T>(BaseEntity model = null) where T : class, new()
         /// <summary>
         /// 执行查询，返回首行首列结果
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
         /// <returns></returns>
-        public object Single<T>(BaseEntity model = null) where T : class, new()
+        public object Single()
         {
-            if (model == null)
-                model = new T() as BaseEntity;
+            //if (model == null)
+            //    model = new T() as BaseEntity;
 
             prepare();
 
@@ -446,7 +439,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
                 finish();
             }
         }
@@ -477,7 +470,7 @@ namespace Snow
             finally
             {
                 // 调试
-                trace(GetSql());
+                trace(getSql());
                 finish();
             }
         }
