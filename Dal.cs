@@ -277,11 +277,18 @@ namespace Snow
 
                 parameters = cmd.Params.ToArray();
 
-                return DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters) > 0;
+                int n = DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters);
+
+                if (n > 0)
+                {
+                    DataCache.Remove(getCacheKey());
+                    return true;
+                }
+                return false;
             }
             catch (Exception e)
             {
-                trace(e.Message);
+                Log.Error(this.GetType().Name, e.Message);
                 throw e;
             }
             finally
@@ -598,10 +605,10 @@ namespace Snow
             // 读取表名
             getTableName();
             // 主键查询
-            if (cmd.IsKey 
-                || entity.Table.PrimaryKey.Key == null 
+            if (cmd.IsKey
+                || entity.Table.PrimaryKey.Key == null
                 || entity[entity.Table.PrimaryKey.Key] == null
-                || entity[entity.Table.PrimaryKey.Key].ToString() == "" 
+                || entity[entity.Table.PrimaryKey.Key].ToString() == ""
                 || entity[entity.Table.PrimaryKey.Key].ToString() == "0")
             {
                 return;

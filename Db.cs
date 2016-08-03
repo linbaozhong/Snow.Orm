@@ -63,6 +63,33 @@ namespace Snow
             return this;
         }
         /// <summary>
+        /// 如果数据实体类指定了主键
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <returns></returns>
+        public Orm Id(object arg)
+        {
+            return Id(entity.Table.PrimaryKey.Key, arg);
+        }
+        /// <summary>
+        /// 适用于联合主键
+        /// </summary>
+        /// <param name="key">逗号分隔的关键字段字符串（"key1,key2"）</param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public Orm Id(string key, params object[] args)
+        {
+            string[] keys = key.Split(',');
+
+            int len = System.Math.Min(keys.Length, args.Length);
+
+            for (int i = 0; i < len; i++)
+            {
+                Id(keys[i], args[i]);
+            }
+            return this;
+        }
+        /// <summary>
         /// 返回前n个记录
         /// </summary>
         /// <param name="n">前n个记录</param>
@@ -386,6 +413,15 @@ namespace Snow
         #endregion
 
         #region 私有方法
+
+        /// <summary>
+        /// 获取cache键值
+        /// </summary>
+        /// <returns></returns>
+        private string getCacheKey()
+        {
+            return string.Concat(cmd.TableName, "-Row-", string.Join(" ", cmd.CacheKey));
+        }
 
         /// <summary>
         /// 构造sql命令

@@ -33,13 +33,13 @@ namespace Snow
         /// <summary>
         /// 获取单行数据
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="pull">强制从数据库拉取</param>
         /// <returns></returns>
-        private DataRow _Row()
+        private DataRow _Row(bool pull = false)
         {
-            string cacheKey = string.Concat(cmd.TableName, "-Row-",string.Join(" ",cmd.CacheKey));
+            string cacheKey = getCacheKey();
 
-            Log.Debug(this.GetType().Name + "_Row",cacheKey);
+            Log.Debug(this.GetType().Name + "_Row", cacheKey);
 
             object obj = DataCache.Get(cacheKey);
 
