@@ -318,7 +318,14 @@ namespace Snow
 
                 parameters = cmd.Params.ToArray();
 
-                return DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters) > 0;
+                int n = DbHelperSQL.ExecuteSql(string.Join(" ", cmd.SqlString), parameters);
+
+                if (n > 0)
+                {
+                    DataCache.Remove(getCacheKey());
+                    return true;
+                }
+                return false;
             }
             catch (Exception e)
             {
