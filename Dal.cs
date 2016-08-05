@@ -43,6 +43,8 @@ namespace Snow
                     // 构造命令
                     createSql();
                 }
+                // 调试
+                trace(getSql());
                 // 读取记录集
                 ds = getDataSet();
             }
@@ -53,8 +55,6 @@ namespace Snow
             }
             finally
             {
-                // 调试
-                trace(getSql());
             }
             return ds;
         }
@@ -780,13 +780,19 @@ namespace Snow
                 // 符合条件的记录总数
                 try
                 {
-                    string _countSql = string.Format("{0} count(1) from {1} where {2}", cmd.Command, cmd.TableName, string.Join(" ", cmd.Where.ToArray()));
+                    string countSql = string.Format("{0} count(1) from {1}", cmd.Command, getName(cmd.TableName));
+
+                    if (cmd.Where.Count > 0)
+                    {
+                        countSql += string.Format(" where {0}",string.Join(" ",cmd.Where));
+                    }
+
                     // 调试
-                    trace(_countSql);
+                    trace(countSql);
 
                     parameters = cmd.Params.ToArray();
 
-                    object n = DbHelperSQL.GetSingle(_countSql, parameters);
+                    object n = DbHelperSQL.GetSingle(countSql, parameters);
 
                     cmd.Page.rowsCount = Convert.ToInt64(n);
 
@@ -826,7 +832,7 @@ namespace Snow
                 {
                     cmd.SqlString.Add(string.Format(" order by T.{0}", string.Join(",T.", cmd.OrderBy.ToArray())));
                 }
-                cmd.SqlString.Add(string.Format(")as Row,T.* from {0} T", cmd.TableName));
+                cmd.SqlString.Add(string.Format(")as Row,T.* from {0} T", getName(cmd.TableName)));
 
                 // Where
                 if (cmd.Where.Count > 0)
