@@ -387,7 +387,7 @@ namespace Snow
             {
                 if (!cmd.IsNative)
                 {
-                    cmd.Fields.Add("count(1)");
+                    cmd.Fields.Add("@count(1)");
                     // 查询准备
                     query();
                     // 构造命令
@@ -724,6 +724,10 @@ namespace Snow
         /// <returns></returns>
         private string getName(string str)
         {
+            if (str.StartsWith("@"))
+            {
+                return str.Substring(1);
+            }
             return "[" + str + "]";
         }
 
@@ -777,39 +781,40 @@ namespace Snow
             // Page 分页查询
             if (cmd.IsPage)
             {
-                // 符合条件的记录总数
-                try
-                {
-                    string countSql = string.Format("{0} count(1) from {1}", cmd.Command, getName(cmd.TableName));
+                //// 符合条件的记录总数
+                //try
+                //{
+                //    string countSql = string.Format("{0} count(1) from {1}", cmd.Command, getName(cmd.TableName));
 
-                    if (cmd.Where.Count > 0)
-                    {
-                        countSql += string.Format(" where {0}",string.Join(" ",cmd.Where));
-                    }
+                //    if (cmd.Where.Count > 0)
+                //    {
+                //        countSql += string.Format(" where {0}",string.Join(" ",cmd.Where));
+                //    }
 
-                    // 调试
-                    trace(countSql);
+                //    // 调试
+                //    //trace(countSql);
 
-                    parameters = cmd.Params.ToArray();
+                //    parameters = cmd.Params.ToArray();
 
-                    object n = DbHelperSQL.GetSingle(countSql, parameters);
+                //    object n = DbHelperSQL.GetSingle(countSql, parameters);
 
-                    cmd.Page.rowsCount = Convert.ToInt64(n);
+                //    cmd.Page.rowsCount = Convert.ToInt64(n);
 
-                    if (cmd.Page.rowsCount > 0)
-                    {
-                        // 总页数
-                        cmd.Page.pages = (int)Math.Ceiling(cmd.Page.rowsCount * 1.0 / cmd.Page.pageSize);
-                        // 
-                        cmd.Page.endIndex = cmd.Page.pageIndex * cmd.Page.pageSize;
-                        cmd.Page.startIndex = cmd.Page.endIndex - cmd.Page.pageSize + 1;
-                    }
-                }
-                catch (Exception e)
-                {
-                    trace(e.Message);
-                    throw e;
-                }
+                //    if (cmd.Page.rowsCount > 0)
+                //    {
+                //        // 总页数
+                //        cmd.Page.pages = (int)Math.Ceiling(cmd.Page.rowsCount * 1.0 / cmd.Page.pageSize);
+                //    }
+                //}
+                //catch (Exception e)
+                //{
+                //    trace(e.Message);
+                //    throw e;
+                //}
+
+                // 
+                cmd.Page.endIndex = cmd.Page.pageIndex * cmd.Page.pageSize;
+                cmd.Page.startIndex = cmd.Page.endIndex - cmd.Page.pageSize + 1;
 
                 // Fields
                 if (cmd.Fields.Count == 0)
