@@ -39,8 +39,6 @@ namespace Snow
         {
             string cacheKey = getCacheKey();
 
-            Log.Debug(this.GetType().Name + "_Row", cacheKey);
-
             object obj = DataCache.Get(cacheKey);
 
             if (obj == null)
