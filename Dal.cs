@@ -603,7 +603,7 @@ namespace Snow
         private void prepare(BaseEntity entity)
         {
             // 读取表名
-            getTableName(entity);
+            setTableName(entity);
             // 主键查询
             if (cmd.IsKey
                 || entity.Table.PrimaryKey.Key == null
@@ -617,7 +617,7 @@ namespace Snow
             Id(entity.Table.PrimaryKey.Key, entity[entity.Table.PrimaryKey.Key]);
         }
 
-        private void getTableName(BaseEntity entity)
+        private void setTableName(BaseEntity entity)
         {
             if (string.IsNullOrWhiteSpace(cmd.TableName))
             {

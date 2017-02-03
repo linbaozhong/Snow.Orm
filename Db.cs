@@ -18,7 +18,7 @@ namespace Snow
 
         #region 公共方法
 
-        internal Orm()
+        public Orm()
         {
             init();
         }
