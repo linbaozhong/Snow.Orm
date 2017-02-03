@@ -8,10 +8,10 @@ namespace Snow
         /// 获取单行数据
         /// </summary>
         /// <returns></returns>
-        public DataRow GetRow()
+        public DataRow GetRow(BaseEntity entity)
         {
-            prepare();
-            DataRow row = _Row();
+            prepare(entity);
+            DataRow row = _Row(entity);
             finish();
 
             return row;
@@ -21,10 +21,10 @@ namespace Snow
         /// 获取多行数据
         /// </summary>
         /// <returns></returns>
-        public DataRow[] GetRows()
+        public DataRow[] GetRows(BaseEntity entity)
         {
-            prepare();
-            DataRow[] rows = _Rows();
+            prepare(entity);
+            DataRow[] rows = _Rows(entity);
             finish();
 
             return rows;
@@ -35,7 +35,7 @@ namespace Snow
         /// </summary>
         /// <param name="pull">强制从数据库拉取</param>
         /// <returns></returns>
-        private DataRow _Row(bool pull = false)
+        private DataRow _Row(BaseEntity entity,bool pull = false)
         {
             string cacheKey = getCacheKey();
 
@@ -43,7 +43,7 @@ namespace Snow
 
             if (obj == null)
             {
-                DataSet ds = _Get();
+                DataSet ds = _Get(entity);
 
                 if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
                 {
@@ -58,9 +58,9 @@ namespace Snow
         /// 获取多行数据
         /// </summary>
         /// <returns></returns>
-        private DataRow[] _Rows()
+        private DataRow[] _Rows(BaseEntity entity)
         {
-            DataSet ds = _Find();
+            DataSet ds = _Find(entity);
 
             if (ds == null || ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
             {

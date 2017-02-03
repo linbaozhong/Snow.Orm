@@ -6,17 +6,19 @@ namespace Snow
 {
     public partial class Orm : NativeDb
     {
-        public void GetModel()
+        public BaseEntity GetModel(BaseEntity entity) 
         {
-            prepare();
-            _Model(_Row(), entity);
+            prepare(entity);
+            _Model(_Row(entity), entity);
             finish();
+
+            return entity;
         }
 
-        public  List<T> GetList<T>() where T : class, new()
+        public  List<T> GetList<T>(BaseEntity entity) where T : class, new()
         {
-            prepare();
-            List<T> _list = _List<T>(_Rows());
+            prepare(entity);
+            List<T> _list = _List<T>(_Rows(entity));
             finish();
 
             return _list;

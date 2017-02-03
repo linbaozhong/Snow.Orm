@@ -14,22 +14,14 @@ namespace Snow
         /// </summary>
         SqlParameter[] parameters;
 
-        BaseEntity entity;
-
         #endregion
 
         #region 公共方法
 
-        internal Orm(BaseEntity model)
-        {
-            init();
-            entity = model;
-        }
-        internal Orm([CallerFilePath]string filePath = "", [CallerMemberName]string methodName = "", [CallerLineNumber]int lineNumber = 0)
+        internal Orm()
         {
             init();
         }
-
         private void init()
         {
             cmd = new Snow.Sql();
@@ -61,15 +53,6 @@ namespace Snow
             cmd.Params.Add(new SqlParameter("@" + key, arg));
 
             return this;
-        }
-        /// <summary>
-        /// 如果数据实体类指定了主键
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns></returns>
-        public Orm Id(object arg)
-        {
-            return Id(entity.Table.PrimaryKey.Key, arg);
         }
         /// <summary>
         /// 适用于联合主键

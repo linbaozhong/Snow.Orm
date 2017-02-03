@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.ComponentModel;
-using System.Data;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Snow
 {
@@ -15,34 +9,14 @@ namespace Snow
     {
         public BaseEntity()
         {
-            DB = new Orm(this);
             Table = new Table();
         }
 
         #region 属性
 
-        public Orm DB;
-        ///// <summary>
-        ///// 数据表名
-        ///// </summary>
-        //public string TableName
-        //{
-        //    protected set;
-        //    get;
-        //}
-
-        ///// <summary>
-        ///// 主键
-        ///// </summary>
-        //public PrimaryKey PrimaryKey
-        //{
-        //    protected set;
-        //    get;
-        //}
-
-            /// <summary>
-            /// 映射数据表属性
-            /// </summary>
+        /// <summary>
+        /// 映射数据表属性
+        /// </summary>
         public Table Table
         {
             get;
@@ -58,19 +32,8 @@ namespace Snow
             get { return this.Dictionary[key.ToLower()]; }
         }
 
-        ///// <summary>
-        ///// 数据实体
-        ///// </summary>
-        //public Dictionary<string, Column> Entity
-        //{
-        //    get
-        //    {
-        //        return this.Dictionary as Dictionary<string, Column>;
-        //    }
-        //}
 
         #endregion
-
 
         #region 事件
         /// <summary>
@@ -127,15 +90,16 @@ namespace Snow
             }
             return default(T);
         }
-        
+
         #endregion
+
     }
 
 
     public class Table
     {
         public string Name { set; get; }
-        public PrimaryKey PrimaryKey {  set; get; }
+        public PrimaryKey PrimaryKey { set; get; }
     }
     /// <summary>
     /// 主键
@@ -147,19 +111,18 @@ namespace Snow
         /// </summary>
         public string Key;
         /// <summary>
-        /// 是否数据库自动生成
+        /// 是否数据库自动生成(自增字段)
         /// </summary>
         public bool Type;
         /// <summary>
-        /// 
+        /// 主键
         /// </summary>
         /// <param name="key">主键字段名，组合主键用逗号分隔</param>
-        /// <param name="type">字段值是否数据库自动生成</param>
+        /// <param name="type">字段值是否数据库自动生成(自增)</param>
         public PrimaryKey(string key, bool type = true)
         {
             Key = key;
             Type = type;
         }
     }
-
 }

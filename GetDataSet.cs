@@ -9,10 +9,10 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public DataSet GetDataSet()
+        public DataSet GetDataSet(BaseEntity entity)
         {
-            prepare();
-            DataSet ds = _Find();
+            prepare(entity);
+            DataSet ds = _Find(entity);
             finish();
 
             return ds;

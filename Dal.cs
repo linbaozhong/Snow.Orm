@@ -16,9 +16,9 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DataSet _Get()
+        private DataSet _Get(BaseEntity entity)
         {
-            return _Find(1);
+            return _Find(entity,1);
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Snow
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DataSet _Find(int top = 0)
+        private DataSet _Find(BaseEntity entity,int top = 0)
         {
             DataSet ds = null;
             try
@@ -39,7 +39,7 @@ namespace Snow
                         cmd.Top = top;
                     }
                     // 查询准备
-                    query();
+                    query(entity);
                     // 构造命令
                     createSql();
                 }
@@ -63,9 +63,9 @@ namespace Snow
         /// 插入一条记录
         /// </summary>
         /// <returns>返回自增键值</returns>
-        public object Insert()
+        public object Insert(BaseEntity entity)
         {
-            prepare();
+            prepare(entity);
             try
             {
                 if (!cmd.IsNative)
@@ -228,9 +228,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Update()
+        public bool Update(BaseEntity entity)
         {
-            prepare();
+            prepare(entity);
             try
             {
                 if (!cmd.IsNative)
@@ -304,9 +304,9 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Delete()
+        public bool Delete(BaseEntity entity)
         {
-            prepare();
+            prepare(entity);
             try
             {
                 if (!cmd.IsNative)
@@ -345,15 +345,15 @@ namespace Snow
         /// <typeparam name="T"></typeparam>
         /// <param name="model"></param>
         /// <returns></returns>
-        public bool Exists()
+        public bool Exists(BaseEntity entity)
         {
-            prepare();
+            prepare(entity);
             try
             {
                 if (!cmd.IsNative)
                 {
                     // 查询准备
-                    query();
+                    query(entity);
                     // 构造命令
                     createSql();
                 }
@@ -379,9 +379,9 @@ namespace Snow
         /// 统计符合条件的记录数
         /// </summary>
         /// <returns></returns>
-        public Int64 Count()
+        public Int64 Count(BaseEntity entity)
         {
-            prepare();
+            prepare(entity);
 
             try
             {
@@ -389,7 +389,7 @@ namespace Snow
                 {
                     cmd.Fields.Add("@count(1)");
                     // 查询准备
-                    query();
+                    query(entity);
                     // 构造命令
                     createSql();
                 }
@@ -417,19 +417,19 @@ namespace Snow
         /// 执行查询，返回首行首列结果
         /// </summary>
         /// <returns></returns>
-        public object Single()
+        public object Single(BaseEntity entity)
         {
             //if (model == null)
             //    model = new T() as BaseEntity;
 
-            prepare();
+            prepare(entity);
 
             try
             {
                 if (!cmd.IsNative)
                 {
                     // 查询准备
-                    query();
+                    query(entity);
                     // 构造命令
                     createSql();
                 }
@@ -490,9 +490,9 @@ namespace Snow
         /// <param name="model"></param>
         /// <param name="outputs">参数</param>
         /// <returns></returns>
-        public int Procedure(string procedureName, params Direction[] direction)
+        public int Procedure(string procedureName,BaseEntity entity, params Direction[] direction)
         {
-            prepare();
+            prepare(entity);
             // 
             if (string.IsNullOrWhiteSpace(procedureName))
             {
@@ -600,10 +600,10 @@ namespace Snow
         /// <summary>
         /// 预处理
         /// </summary>
-        private void prepare()
+        private void prepare(BaseEntity entity)
         {
             // 读取表名
-            getTableName();
+            getTableName(entity);
             // 主键查询
             if (cmd.IsKey
                 || entity.Table.PrimaryKey.Key == null
@@ -617,7 +617,7 @@ namespace Snow
             Id(entity.Table.PrimaryKey.Key, entity[entity.Table.PrimaryKey.Key]);
         }
 
-        private void getTableName()
+        private void getTableName(BaseEntity entity)
         {
             if (string.IsNullOrWhiteSpace(cmd.TableName))
             {
@@ -731,7 +731,7 @@ namespace Snow
             return "[" + str + "]";
         }
 
-        private void query()
+        private void query(BaseEntity entity)
         {
             cmd.Command = Command.Select;
 
