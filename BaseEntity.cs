@@ -92,7 +92,6 @@ namespace Snow
         }
 
         #endregion
-
     }
 
 
@@ -125,4 +124,68 @@ namespace Snow
             Type = type;
         }
     }
+    //public class Column
+    //{
+    //    private object _value = null;
+    //    private ColumnType _columnType = ColumnType.String;
+    //    private string _name = string.Empty;
+    //    private string _aliax = string.Empty;
+    //    public Column(string name, string alias = "", string memo = "", ColumnType columnType = ColumnType.Int)
+    //    {
+    //        _name = name;
+    //        _columnType = columnType;
+    //    }
+    //    public object Value
+    //    {
+    //        set
+    //        {
+    //            _value = value;
+    //        }
+    //        get
+    //        {
+    //            switch (_columnType)
+    //            {
+    //                case ColumnType.Int:
+    //                    if (_value == null)
+    //                    {
+    //                        return 0;
+    //                    }
+    //                    else
+    //                    {
+    //                        int result = 0;
+    //                        if (int.TryParse(_value.ToString(), out result))
+    //                        {
+    //                            return result;
+    //                        }
+    //                        return 0;
+    //                    }
+    //                case ColumnType.Long:
+    //                    if (_value == null)
+    //                    {
+    //                        return 0;
+    //                    }
+    //                    else
+    //                    {
+    //                        long result = 0;
+    //                        if (long.TryParse(_value.ToString(), out result))
+    //                        {
+    //                            return result;
+    //                        }
+    //                        return 0;
+    //                    }
+    //                case ColumnType.String:
+    //                    return _value;
+    //                default:
+    //                    return _value;
+    //            }
+    //        }
+    //    }
+    //}
+
+    //public enum ColumnType
+    //{
+    //    Int,
+    //    Long,
+    //    String
+    //}
 }
